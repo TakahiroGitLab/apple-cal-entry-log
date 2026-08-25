@@ -106,6 +106,13 @@ public final class EventKitSource {
             .sorted { ($0.source, $0.title) < ($1.source, $1.title) }
     }
 
+    /// Posted when anything in the calendar database changes --
+    /// an entry added here, or one arriving from another device.
+    ///
+    /// Re-exported so that a caller can watch for changes without
+    /// importing EventKit itself.
+    public static let storeChanged = Notification.Name.EKEventStoreChanged
+
     /// Drop whatever the store has cached.
     ///
     /// Needed in two situations that look nothing alike. A store made

@@ -59,9 +59,8 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
 
     public var id: String
 
-    /// The identifier that survives a sync, which is the one Calendar
-    /// accepts in a link. Nil for an entry that has never left this
-    /// Mac.
+    /// The identifier that survives a sync. Nil for an entry that has
+    /// never left this Mac.
     public var externalId: String?
 
     public var title: String?
@@ -133,11 +132,6 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.calendarIsWritable = calendarIsWritable
         self.organizer = organizer
         self.attendees = attendees
-    }
-
-    /// A link that opens this entry in Calendar.
-    public var calendarAppLink: URL? {
-        CalendarAppLink.show(externalId)
     }
 
     /// How long it runs: "2h", "45m", "3 days".

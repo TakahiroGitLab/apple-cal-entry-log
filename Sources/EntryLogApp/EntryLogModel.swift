@@ -34,6 +34,7 @@ final class EntryLogModel {
     let timeZone = TimeZone.current
 
     private let reader = CalendarReader()
+    private var pending: Task<Void, Never>?
 
     /// Changes only when the chosen *days* change, so picking a
     /// different time on the same day does not set off a search.
@@ -76,6 +77,22 @@ final class EntryLogModel {
 
         return calendar.isDate(startDay, inSameDayAs: day)
             && calendar.isDate(endDay, inSameDayAs: day)
+    }
+
+    /// Read again shortly.
+    ///
+    /// A sync posts a burst of change notifications rather than one,
+    /// so each request cancels the last and only the final one runs.
+    func reloadSoon() {
+        pending?.cancel()
+
+        pending = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(800))
+
+            guard !Task.isCancelled else { return }
+
+            await self?.reload()
+        }
     }
 
     func reload() async {

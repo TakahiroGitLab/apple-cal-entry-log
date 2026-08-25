@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import CalEntryCore
+import CalEntryKit
 
 struct EntryListView: View {
 
@@ -27,6 +28,24 @@ struct EntryListView: View {
 
             await model.reload()
         }
+        .task {
+            // An entry added in Calendar, or arriving from the phone,
+            // should appear here without being asked for.
+            for await _ in NotificationCenter.default.notifications(
+                named: EventKitSource.storeChanged
+            ) {
+                model.reloadSoon()
+            }
+        }
+        .task {
+            // Coming back to the window is as good a moment as any to
+            // be sure of what it is showing.
+            for await _ in NotificationCenter.default.notifications(
+                named: NSApplication.didBecomeActiveNotification
+            ) {
+                model.reloadSoon()
+            }
+        }
     }
 
 
@@ -45,11 +64,16 @@ struct EntryListView: View {
 
                 Spacer()
 
+                // The list keeps itself up to date, so this is only
+                // ever a retry. An icon is as much room as that
+                // deserves.
                 Button {
                     Task { await model.reload() }
                 } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                    Image(systemName: "arrow.clockwise")
                 }
+                .keyboardShortcut("r")
+                .help("Read again (⌘R)")
                 .disabled(model.state == .loading)
             }
 
@@ -134,7 +158,8 @@ struct EntryListView: View {
                 EntryRowView(
                     logged: logged,
                     formatting: formatting,
-                    showsRole: model.showsRoleFilter
+                    showsRole: model.showsRoleFilter,
+                    timeZone: model.timeZone
                 )
             }
             .listStyle(.inset)

@@ -1,33 +1,6 @@
 import Foundation
 import CalEntryCore
 
-func calendarAppLinkTests(_ h: Harness) {
-
-    h.suite("Calendar link") { h in
-
-        h.test("An identifier becomes a link Calendar understands") {
-            h.equal(CalendarAppLink.show("ABC123")?.absoluteString,
-                    "ical://ekevent/ABC123?method=show&options=more", "link")
-        }
-
-        h.test("Characters that would break the link are escaped") {
-            // An identifier ending the path or opening a query would
-            // send Calendar somewhere else entirely.
-            let link = CalendarAppLink.show("a/b?c=d&e")?.absoluteString
-
-            h.equal(link,
-                    "ical://ekevent/a%2Fb%3Fc%3Dd%26e?method=show&options=more",
-                    "link")
-        }
-
-        h.test("An entry that has never synced has no link") {
-            h.isNil(CalendarAppLink.show(nil), "no identifier")
-            h.isNil(CalendarAppLink.show(""), "empty identifier")
-        }
-    }
-}
-
-
 func dayRangeFromDatesTests(_ h: Harness) {
 
     h.suite("Range from picked dates") { h in

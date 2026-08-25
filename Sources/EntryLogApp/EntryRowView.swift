@@ -7,6 +7,7 @@ struct EntryRowView: View {
     let logged: LoggedEntry
     let formatting: Formatting
     let showsRole: Bool
+    let timeZone: TimeZone
 
     private var entry: CalendarEntry { logged.entry }
 
@@ -72,12 +73,11 @@ struct EntryRowView: View {
         }
         .padding(.vertical, 6)
         .contentShape(Rectangle())
-        .onTapGesture(count: 2) { openInCalendar() }
+        .onTapGesture(count: 2) { showInCalendar() }
         .contextMenu {
-            Button("Open in Calendar") { openInCalendar() }
-                .disabled(entry.calendarAppLink == nil)
+            Button("Show in Calendar") { showInCalendar() }
         }
-        .help("Double-click to open in Calendar")
+        .help("Double-click to show the day in Calendar")
     }
 
     private func detail(_ text: String, icon: String) -> some View {
@@ -87,8 +87,7 @@ struct EntryRowView: View {
             .textSelection(.enabled)
     }
 
-    private func openInCalendar() {
-        guard let link = entry.calendarAppLink else { return }
-        NSWorkspace.shared.open(link)
+    private func showInCalendar() {
+        CalendarNavigator.show(entry, timeZone: timeZone)
     }
 }

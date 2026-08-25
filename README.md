@@ -25,8 +25,21 @@ terminal's.
 
 The window takes a range, has Yesterday and Today to hand, and lists
 what was written down in it. Ticking a role filters what is already
-loaded rather than searching again. Double-click a row, or use its
-context menu, to open the entry in Calendar.
+loaded rather than searching again. It reads again by itself when the
+calendar changes -- an entry added here or arriving from the phone --
+and when the window comes back to the front, so the reload button is
+only ever a retry.
+
+Double-click a row to send Calendar to that day, in day view.
+Selecting the entry itself is not on offer: Calendar's scripting can
+find an event by its uid, but only by scanning, and a scan across
+these calendars ran for two minutes without finishing. The
+`ical://ekevent/` scheme opens Calendar without navigating. Opening
+the right day takes under half a second and puts the entry on screen,
+which is what was wanted.
+
+Two permissions, both asked for in the app's own name: calendars, to
+read them, and Apple Events, to send Calendar to a day.
 
 ```
 swift run entry-log                       # today
@@ -74,7 +87,7 @@ the same name. A real app later would need
 swift run core-tests
 ```
 
-137 checks, no dependencies, and no Xcode: neither XCTest nor
+133 checks, no dependencies, and no Xcode: neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about 100 lines and prints

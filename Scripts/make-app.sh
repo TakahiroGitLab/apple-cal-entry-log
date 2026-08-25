@@ -46,6 +46,9 @@ cat > "${CONTENTS}/Info.plist" <<PLIST
   <key>NSPrincipalClass</key>              <string>NSApplication</string>
   <key>NSHighResolutionCapable</key>       <true/>
 
+  <key>NSAppleEventsUsageDescription</key>
+  <string>Entry Log asks Calendar to open the day an entry falls on, so that you can see it in context. It sends no other commands.</string>
+
   <key>NSCalendarsFullAccessUsageDescription</key>
   <string>Entry Log lists the calendar entries you wrote down, in the order you wrote them, so it needs to read your calendars. Nothing is changed, and nothing leaves this Mac.</string>
 </dict>
