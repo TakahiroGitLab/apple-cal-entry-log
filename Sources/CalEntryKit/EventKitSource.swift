@@ -106,6 +106,17 @@ public final class EventKitSource {
             .sorted { ($0.source, $0.title) < ($1.source, $1.title) }
     }
 
+    /// Drop whatever the store has cached.
+    ///
+    /// Needed in two situations that look nothing alike. A store made
+    /// before the user granted access keeps reporting an empty
+    /// calendar afterwards, and a long-lived store can lag behind
+    /// entries added in Calendar since it was made. Both are fixed by
+    /// the same call, so a refresh does it every time.
+    public func refresh() {
+        store.reset()
+    }
+
     /// The calendars worth searching.
     ///
     /// An entry on a read-only calendar -- holidays, birthdays,
@@ -127,15 +138,38 @@ public final class EventKitSource {
         planner: FetchPlanner = .standard,
         timeZone: TimeZone = .current,
         in calendars: [EKCalendar]? = nil
-    ) -> [LoggedEntry] {
+    ) -> Reading {
 
         let plan = planner.plan(for: range, timeZone: timeZone)
+        let searched = calendars ?? writableCalendars()
 
-        return EntryLog.entries(
-            from: entries(matching: plan, in: calendars ?? writableCalendars()),
-            createdIn: range,
-            roles: roles
+        return Reading(
+            entries: EntryLog.entries(
+                from: entries(matching: plan, in: searched),
+                createdIn: range,
+                roles: roles
+            ),
+            plan: plan,
+            // Worth reporting when the answer is nothing: no entries
+            // across nine calendars is a quiet day, and no entries
+            // across none of them is a permission problem.
+            calendarsSearched: searched.count
         )
+    }
+}
+
+
+/// What one search found, and what it looked through to find it.
+public struct Reading: Sendable {
+
+    public let entries: [LoggedEntry]
+    public let plan: FetchPlan
+    public let calendarsSearched: Int
+
+    public init(entries: [LoggedEntry], plan: FetchPlan, calendarsSearched: Int) {
+        self.entries = entries
+        self.plan = plan
+        self.calendarsSearched = calendarsSearched
     }
 }
 

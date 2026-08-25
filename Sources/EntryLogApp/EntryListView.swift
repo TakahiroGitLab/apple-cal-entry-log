@@ -122,7 +122,10 @@ struct EntryListView: View {
                 ContentUnavailableView(
                     "Nothing was written down",
                     systemImage: "calendar.badge.clock",
-                    description: Text("No entries were created in this range.")
+                    // Nothing across nine calendars is a quiet week.
+                    // Nothing across none of them is a permission
+                    // problem, and saying which saves an hour.
+                    description: Text(emptyReason)
                 )
             }
 
@@ -135,6 +138,20 @@ struct EntryListView: View {
                 )
             }
             .listStyle(.inset)
+        }
+    }
+
+    private var emptyReason: String {
+        switch model.calendarsSearched {
+        case 0:
+            return "No calendars could be read. Check that Entry Log "
+                + "has calendar access in Privacy Settings."
+        case 1:
+            return "No entries were created in this range, in the one "
+                + "calendar you can write to."
+        default:
+            return "No entries were created in this range, across "
+                + "\(model.calendarsSearched) calendars."
         }
     }
 

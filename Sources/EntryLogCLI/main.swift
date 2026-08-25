@@ -239,11 +239,14 @@ if flags.contains("--diagnose") {
     exit(0)
 }
 
-let planner = FetchPlanner.standard
-let plan = planner.plan(for: range, timeZone: timeZone)
-let log = source.log(
-    createdIn: range, roles: roles, planner: planner, timeZone: timeZone
+source.refresh()
+
+let reading = source.log(
+    createdIn: range, roles: roles, planner: .standard, timeZone: timeZone
 )
+
+let log = reading.entries
+let plan = reading.plan
 
 print("")
 print(startDay == endDay ? startDay : "\(startDay) - \(endDay)")
@@ -299,5 +302,6 @@ for entry in log {
 
 print("")
 print("\(log.count) entries. "
-      + "Searched \(day(plan.span.start)) to \(day(plan.span.end)) "
+      + "Searched \(reading.calendarsSearched) calendars, "
+      + "\(day(plan.span.start)) to \(day(plan.span.end)), "
       + "in \(plan.windows.count) queries.")

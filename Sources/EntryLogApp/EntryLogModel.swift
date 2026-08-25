@@ -29,6 +29,7 @@ final class EntryLogModel {
 
     private(set) var searched: FetchWindow?
     private(set) var queries = 0
+    private(set) var calendarsSearched = 0
 
     let timeZone = TimeZone.current
 
@@ -99,15 +100,16 @@ final class EntryLogModel {
             return
         }
 
-        let result = await reader.log(createdIn: range, timeZone: timeZone)
+        let reading = await reader.log(createdIn: range, timeZone: timeZone)
 
         // A search the user has already moved on from should not
         // overwrite the one they are waiting for.
         guard !Task.isCancelled else { return }
 
-        loaded = result.entries
-        searched = result.plan.span
-        queries = result.plan.windows.count
+        loaded = reading.entries
+        searched = reading.plan.span
+        queries = reading.plan.windows.count
+        calendarsSearched = reading.calendarsSearched
         state = .ready
     }
 }
