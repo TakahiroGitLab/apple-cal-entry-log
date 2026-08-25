@@ -11,13 +11,18 @@ calendars.
 ## Running it
 
 ```
-./Scripts/make-app.sh && open build/EntryLog.app
+./Scripts/install.sh              # build, and put it in /Applications
+./Scripts/make-app.sh             # build into build/ only
 ```
 
 No Xcode: SwiftPM builds the binary against the Command Line Tools SDK
-and the script assembles the bundle around it, ad-hoc signed. Copy
-`build/EntryLog.app` to `/Applications` to keep it -- the signing
-identifier stays the same, so the permissions granted to it hold.
+and the script assembles the bundle around it, ad-hoc signed.
+
+Use `install.sh` once a copy lives in `/Applications`. Building into
+`build/` alone leaves that copy stale, and running yesterday's app
+while editing today's is a confusing afternoon. It quits a running
+copy, replaces the installed one outright rather than copying over it,
+and checks the signature afterwards.
 
 The window takes a range, has Yesterday and Today to hand, and lists
 what was written down in it, oldest first. Ticking a role filters what
