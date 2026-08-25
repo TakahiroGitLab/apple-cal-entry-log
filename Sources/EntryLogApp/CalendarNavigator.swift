@@ -4,8 +4,11 @@ import CalEntryCore
 
 /// Sends Calendar to the day an entry falls on.
 ///
-/// The day, and nothing else: Calendar's view mode is the user's
-/// setting, and switching it to day view would outlast the visit.
+/// In month view, deliberately. `view calendar at` honours the date
+/// and ignores the time, so day view lands on the right day scrolled
+/// to the wrong hour -- a four o'clock entry shown against eight in
+/// the morning, which reads as the wrong entry. A month has no hours
+/// to be wrong about.
 ///
 /// Selecting the entry itself is not on offer. Calendar's scripting
 /// dictionary can find an event by its uid, but only by scanning, and
@@ -27,7 +30,7 @@ enum CalendarNavigator {
         calendar.timeZone = timeZone
 
         let parts = calendar.dateComponents(
-            [.year, .month, .day, .hour, .minute], from: moment
+            [.year, .month, .day], from: moment
         )
 
         guard let year = parts.year, let month = parts.month, let day = parts.day
@@ -44,11 +47,9 @@ enum CalendarNavigator {
             set year of d to \(year)
             set month of d to \(month)
             set day of d to \(day)
-            set hours of d to \(parts.hour ?? 9)
-            set minutes of d to \(parts.minute ?? 0)
-            set seconds of d to 0
             tell application "Calendar"
                 activate
+                switch view to month view
                 view calendar at d
             end tell
             """

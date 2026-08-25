@@ -29,8 +29,11 @@ loaded rather than searching again. It reads again by itself when the
 calendar changes -- an entry added here or arriving from the phone --
 so the reload button is only ever a retry.
 
-Double-click a row to send Calendar to that day, leaving its view
-mode alone.
+Double-click a row to send Calendar to that day, in month view.
+`view calendar at` honours a date and ignores the time, so day view
+lands on the right day scrolled to the wrong hour -- a four o'clock
+entry shown against eight in the morning reads as the wrong entry
+entirely. A month has no hours to be wrong about.
 Selecting the entry itself is not on offer: Calendar's scripting can
 find an event by its uid, but only by scanning, and a scan across
 these calendars ran for two minutes without finishing. The
