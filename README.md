@@ -57,7 +57,7 @@ the same name. A real app later would need
 swift run core-tests
 ```
 
-84 checks, no dependencies, and no Xcode: neither XCTest nor
+106 checks, no dependencies, and no Xcode: neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about 100 lines and prints

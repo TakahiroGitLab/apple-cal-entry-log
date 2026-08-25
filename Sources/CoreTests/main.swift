@@ -8,5 +8,7 @@ dayRangeTests(harness)
 entryLogTests(harness)
 fetchPlanTests(harness)
 mailtoAddressTests(harness)
+durationLabelTests(harness)
+noteSummaryTests(harness)
 
 exit(harness.report())

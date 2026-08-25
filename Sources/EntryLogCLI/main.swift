@@ -66,12 +66,50 @@ let stamp: (Date) -> String = { date in
     return formatter.string(from: date)
 }
 
+let clock: (Date) -> String = { date in
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.timeZone = timeZone
+    formatter.dateFormat = "HH:mm"
+    return formatter.string(from: date)
+}
+
 let day: (Date) -> String = { date in
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")
     formatter.timeZone = timeZone
     formatter.dateFormat = "yyyy/MM/dd"
     return formatter.string(from: date)
+}
+
+/// When an entry runs, as one line: the start, the end in whichever
+/// form is not repetitive, and how long that comes to.
+func whenLine(_ entry: CalendarEntry) -> String? {
+
+    guard let start = entry.startDate else { return nil }
+
+    let length = entry.duration(in: timeZone)
+
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = timeZone
+
+    guard let end = entry.endDate, end > start else {
+        return entry.isAllDay ? "\(day(start)) (all day)" : stamp(start)
+    }
+
+    let sameDay = calendar.isDate(start, inSameDayAs: end)
+
+    if entry.isAllDay {
+        return sameDay
+            ? "\(day(start)) (all day)"
+            : "\(day(start)) - \(day(end)) (\(length ?? "all day"))"
+    }
+
+    // Repeating the date when it has not changed is just noise.
+    let finish = sameDay ? clock(end) : stamp(end)
+    let tail = length.map { " (\($0))" } ?? ""
+
+    return "\(stamp(start)) - \(finish)\(tail)"
 }
 
 let source = EventKitSource()
@@ -213,9 +251,12 @@ for entry in log {
     print("  \(stamp(entry.creationDate))\(tag)")
     print("  \(entry.entry.displayTitle)")
 
-    if let start = entry.entry.startDate {
-        let when = entry.entry.isAllDay ? day(start) : stamp(start)
+    if let when = whenLine(entry.entry) {
         print("    when:      \(when)")
+    }
+
+    if let where_ = entry.entry.locationLabel {
+        print("    where:     \(where_)")
     }
 
     print("    calendar:  \(entry.entry.calendarLabel)")
@@ -229,6 +270,14 @@ for entry in log {
 
     let guests = entry.entry.guests
     if !guests.isEmpty { print("    guests:    \(guests.joined(separator: ", "))") }
+
+    if let note = entry.entry.noteSummary {
+        print("    note:      \(note)")
+    }
+
+    if let url = entry.entry.url {
+        print("    url:       \(url.absoluteString)")
+    }
 }
 
 print("")

@@ -69,7 +69,15 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
     /// reason the fetch window has to be widened (see `FetchWindow`).
     public var startDate: Date?
 
+    /// When it finishes. For an all-day entry this is the last
+    /// moment of its final day, not the following midnight.
+    public var endDate: Date?
+
     public var isAllDay: Bool
+
+    public var location: String?
+    public var notes: String?
+    public var url: URL?
 
     public var calendarTitle: String
 
@@ -92,7 +100,11 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         title: String? = nil,
         creationDate: Date? = nil,
         startDate: Date? = nil,
+        endDate: Date? = nil,
         isAllDay: Bool = false,
+        location: String? = nil,
+        notes: String? = nil,
+        url: URL? = nil,
         calendarTitle: String = "",
         calendarSource: String = "",
         calendarIsWritable: Bool = true,
@@ -103,12 +115,38 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.title = title
         self.creationDate = creationDate
         self.startDate = startDate
+        self.endDate = endDate
         self.isAllDay = isAllDay
+        self.location = location
+        self.notes = notes
+        self.url = url
         self.calendarTitle = calendarTitle
         self.calendarSource = calendarSource
         self.calendarIsWritable = calendarIsWritable
         self.organizer = organizer
         self.attendees = attendees
+    }
+
+    /// How long it runs: "2h", "45m", "3 days".
+    public func duration(in timeZone: TimeZone) -> String? {
+        DurationLabel.from(
+            start: startDate, end: endDate, isAllDay: isAllDay,
+            timeZone: timeZone
+        )
+    }
+
+    /// The notes on one line, cut to length.
+    public var noteSummary: String? {
+        NoteSummary.oneLine(notes)
+    }
+
+    /// A location worth printing, rather than an empty string.
+    public var locationLabel: String? {
+        guard let location else { return nil }
+
+        let trimmed = location.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     /// "iCloud / Work", or just the title when there is no account to
