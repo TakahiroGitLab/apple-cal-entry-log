@@ -115,9 +115,20 @@ identifier and one creation date.
 The search is still bounded, so `FetchPlan.span` reports where it
 stopped. Saying so is more honest than implying it looked everywhere.
 
+## The invited role, on an account with no shared calendars
+
+On the account this was built against, every entry is one the user
+wrote: nothing is shared, so nothing is an invitation, and the invited
+role is correctly empty rather than broken. That may change.
+
+So the rule is not to remove the role but to stop showing it: the
+listing tags entries with their role only when more than one role is
+present. An always-empty filter is a dead control, and a filter that
+appears the day a shared calendar turns up needs no setting and no
+second thought.
+
 ## Next
 
-- Try it against a real calendar, on a Mac that has one.
 - A way to open an entry in Calendar from the list.
 - An interface. Note this is per-Mac: the iPhone would need an actual
   app.

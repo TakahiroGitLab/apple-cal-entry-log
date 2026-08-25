@@ -198,9 +198,19 @@ guard !log.isEmpty else {
     exit(0)
 }
 
+// Only worth saying which role an entry has when there is more than
+// one to tell apart. On an account nobody shares a calendar with,
+// every entry is one the user wrote, and tagging each of them
+// "created" says nothing. It starts appearing on its own the day a
+// shared calendar turns up.
+let rolesPresent = Set(log.map(\.role))
+let showRole = rolesPresent.count > 1
+
 for entry in log {
+    let tag = showRole ? "  [\(entry.role.rawValue)]" : ""
+
     print("")
-    print("  \(stamp(entry.creationDate))  [\(entry.role.rawValue)]")
+    print("  \(stamp(entry.creationDate))\(tag)")
     print("  \(entry.entry.displayTitle)")
 
     if let start = entry.entry.startDate {
@@ -208,7 +218,7 @@ for entry in log {
         print("    when:      \(when)")
     }
 
-    print("    calendar:  \(entry.entry.calendarTitle)")
+    print("    calendar:  \(entry.entry.calendarLabel)")
 
     if let organizer = entry.entry.organizerLabel {
         print("    set up by: \(organizer)")
