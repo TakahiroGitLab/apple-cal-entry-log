@@ -23,7 +23,7 @@ No EventKit yet -- nothing here imports it.
 swift run core-tests
 ```
 
-52 checks, no dependencies, and no Xcode: neither XCTest nor
+84 checks, no dependencies, and no Xcode: neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about 100 lines and prints
@@ -64,15 +64,22 @@ midnight after the last -- so 23:59 on the final day is in. The end is
 widened by calendar arithmetic rather than 86 400 seconds, so a range
 crossing a daylight-saving change still covers whole days.
 
-**The fetch window is the awkward part.** EventKit can only be queried
-by when an entry *happens*. So the store has to be over-fetched by
-event date and filtered on `creationDate` afterwards. Unlike the Google
-version's `updatedMin`, this prefilter is **not** guaranteed to be a
-superset: an entry written today for a clinic three years out falls
-outside any sane window, and nothing in the store hints that it was
-missed. `FetchWindowPolicy` defaults to a year behind and two years
-ahead, and clamps to the four years EventKit will accept -- trimming
-the past first, since entries are usually written for what is coming.
+**The fetch plan.** EventKit can only be queried by when an entry
+*happens*. So the store is over-fetched by event date and filtered on
+`creationDate` afterwards. A single query cannot span more than four
+years -- but nothing stops several of them, so `FetchPlanner` cuts the
+searched span into abutting windows that each fit. The default is a
+decade either side of the range, which is five queries over a local
+store: cheap.
+
+Windows abut rather than overlap, but EventKit returns any entry
+*overlapping* a window, so one straddling a boundary comes back twice.
+The adapter deduplicates by calendar item identifier -- which it must
+do regardless, since every occurrence of a repeating entry shares one
+identifier and one creation date.
+
+The search is still bounded, so `FetchPlan.span` reports where it
+stopped. Saying so is more honest than implying it looked everywhere.
 
 ## Next
 
