@@ -101,7 +101,21 @@ public final class EventKitSource {
             .sorted { ($0.source, $0.title) < ($1.source, $1.title) }
     }
 
+    /// The calendars worth searching.
+    ///
+    /// An entry on a read-only calendar -- holidays, birthdays,
+    /// somebody's published calendar -- can be neither created by the
+    /// user nor an invitation to them, since an invitation has to land
+    /// somewhere they can accept it. So skipping those loses nothing
+    /// the log would have shown and saves enumerating them.
+    public func writableCalendars() -> [EKCalendar] {
+        store.calendars(for: .event)
+            .filter { $0.allowsContentModifications }
+    }
+
     /// The whole job: search, filter by creation date, tag by role.
+    ///
+    /// Searches the writable calendars unless told otherwise.
     public func log(
         createdIn range: DayRange,
         roles: Set<EntryRole> = Set(EntryRole.allCases),
@@ -113,7 +127,7 @@ public final class EventKitSource {
         let plan = planner.plan(for: range, timeZone: timeZone)
 
         return EntryLog.entries(
-            from: entries(matching: plan, in: calendars),
+            from: entries(matching: plan, in: calendars ?? writableCalendars()),
             createdIn: range,
             roles: roles
         )

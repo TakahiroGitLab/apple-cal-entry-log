@@ -73,6 +73,11 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
 
     public var calendarTitle: String
 
+    /// The account the calendar belongs to. Two calendars can share a
+    /// title -- a subscribed holiday calendar and an iCloud copy of
+    /// the same one -- and only this tells them apart.
+    public var calendarSource: String
+
     /// Whether the user can edit this calendar. Used to tell an entry
     /// the user typed in from one that merely appeared on a subscribed
     /// calendar, since neither carries an organizer.
@@ -89,6 +94,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         startDate: Date? = nil,
         isAllDay: Bool = false,
         calendarTitle: String = "",
+        calendarSource: String = "",
         calendarIsWritable: Bool = true,
         organizer: Participant? = nil,
         attendees: [Participant] = []
@@ -99,9 +105,18 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.startDate = startDate
         self.isAllDay = isAllDay
         self.calendarTitle = calendarTitle
+        self.calendarSource = calendarSource
         self.calendarIsWritable = calendarIsWritable
         self.organizer = organizer
         self.attendees = attendees
+    }
+
+    /// "iCloud / Work", or just the title when there is no account to
+    /// name.
+    public var calendarLabel: String {
+        calendarSource.isEmpty
+            ? calendarTitle
+            : "\(calendarSource) / \(calendarTitle)"
     }
 
     public var displayTitle: String {

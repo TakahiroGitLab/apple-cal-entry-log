@@ -101,8 +101,9 @@ if flags.contains("--diagnose") {
     let wide = FetchPlanner.standard.plan(for: range, timeZone: timeZone)
 
     print("")
-    print("Reading \(day(wide.span.start)) to \(day(wide.span.end))"
-          + " in \(wide.windows.count) queries...")
+    print("Reading every calendar, \(day(wide.span.start))"
+          + " to \(day(wide.span.end)), in \(wide.windows.count) queries."
+          + " A normal run searches only the writable ones.")
 
     let all = source.entries(matching: wide)
 
@@ -111,12 +112,12 @@ if flags.contains("--diagnose") {
     var dated: [Date] = []
 
     for entry in all {
-        totalByCalendar[entry.calendarTitle, default: 0] += 1
+        totalByCalendar[entry.calendarLabel, default: 0] += 1
 
         if let created = entry.creationDate {
             dated.append(created)
         } else {
-            missingByCalendar[entry.calendarTitle, default: 0] += 1
+            missingByCalendar[entry.calendarLabel, default: 0] += 1
         }
     }
 
@@ -138,6 +139,35 @@ if flags.contains("--diagnose") {
             print("    \(calendar): \(count) of \(total)")
         }
     }
+
+    // Whether nobody invites the user, or whether EventKit fails to
+    // recognise the user when somebody does, look identical in the
+    // role tally. These tell them apart.
+    var withOrganizer = 0
+    var organizedByUser = 0
+    var withAttendees = 0
+    var userOnTheList = 0
+
+    for entry in all {
+        if let organizer = entry.organizer {
+            withOrganizer += 1
+            if organizer.isCurrentUser { organizedByUser += 1 }
+        }
+
+        if !entry.attendees.isEmpty {
+            withAttendees += 1
+            if entry.attendees.contains(where: \.isCurrentUser) {
+                userOnTheList += 1
+            }
+        }
+    }
+
+    print("")
+    print("Invitations")
+    print("  \(withOrganizer) entries name an organiser,"
+          + " \(organizedByUser) of them you")
+    print("  \(withAttendees) entries have a guest list,"
+          + " \(userOnTheList) of them include you")
 
     var byRole: [String: Int] = [:]
     for entry in all {

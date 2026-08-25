@@ -105,3 +105,23 @@ func roleTests(_ h: Harness) {
         }
     }
 }
+
+func calendarLabelTests(_ h: Harness) {
+
+    h.suite("Calendar label") { h in
+
+        h.test("A calendar is named with the account it belongs to") {
+            let entry = CalendarEntry(
+                id: "11", calendarTitle: "Work", calendarSource: "iCloud"
+            )
+
+            h.equal(entry.calendarLabel, "iCloud / Work", "label")
+        }
+
+        h.test("With no account there is just the title") {
+            let entry = CalendarEntry(id: "12", calendarTitle: "Work")
+
+            h.equal(entry.calendarLabel, "Work", "label")
+        }
+    }
+}

@@ -21,6 +21,7 @@ extension CalendarEntry {
             startDate: event.startDate,
             isAllDay: event.isAllDay,
             calendarTitle: event.calendar?.title ?? "",
+            calendarSource: event.calendar?.source?.title ?? "",
             // Missing rather than false would be the safer default,
             // but a calendar EventKit will not describe is not one the
             // user can write to either.

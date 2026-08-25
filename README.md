@@ -27,6 +27,16 @@ only has one if the server sent `CREATED` with it. If the count comes
 back at zero, the tool cannot work and nothing in this repo can fix
 that.
 
+On one iCloud account, 2150 of 2250 entries had one, the oldest
+written in 2013. The hundred without were the subscribed holiday
+calendar entire, plus twelve scattered across writable calendars --
+those twelve are dropped from the log, quietly, by design.
+
+A normal run searches only writable calendars. An entry on a read-only
+one can be neither written by the user nor an invitation to them,
+since an invitation has to land somewhere it can be accepted, so
+skipping holidays and birthdays loses nothing and saves the reading.
+
 The first run asks for calendar access. A command-line tool has no
 bundle of its own, so macOS attributes the request to the terminal it
 was launched from -- expect a prompt naming Terminal, not `entry-log`,
