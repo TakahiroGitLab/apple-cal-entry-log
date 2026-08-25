@@ -16,7 +16,16 @@ tried against a real calendar.
 swift run entry-log                       # today
 swift run entry-log 2026-08-18 2026-08-20 # a range
 swift run entry-log --created             # only what I wrote
+swift run entry-log --diagnose            # what EventKit can see
 ```
+
+Run `--diagnose` first. It lists the calendars EventKit can reach and,
+more to the point, counts how many entries carry a `creationDate` at
+all. That field is populated by the account an entry came from, not by
+anything here: a local calendar always sets it, but an iCloud entry
+only has one if the server sent `CREATED` with it. If the count comes
+back at zero, the tool cannot work and nothing in this repo can fix
+that.
 
 The first run asks for calendar access. A command-line tool has no
 bundle of its own, so macOS attributes the request to the terminal it

@@ -20,6 +20,8 @@ guard !arguments.contains("--help"), !arguments.contains("-h") else {
           --created   only entries the user wrote
           --invited   only entries the user was invited to
                       (neither flag means both)
+          --diagnose  report what EventKit can see, and how many
+                      entries carry a creation date at all
         """)
     exit(0)
 }
@@ -56,21 +58,6 @@ do {
     exit(2)
 }
 
-let source = EventKitSource()
-
-do {
-    try await source.requestAccess()
-} catch {
-    FileHandle.standardError.write(Data("\(error)\n".utf8))
-    exit(1)
-}
-
-let planner = FetchPlanner.standard
-let plan = planner.plan(for: range, timeZone: timeZone)
-let log = source.log(
-    createdIn: range, roles: roles, planner: planner, timeZone: timeZone
-)
-
 let stamp: (Date) -> String = { date in
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -86,6 +73,92 @@ let day: (Date) -> String = { date in
     formatter.dateFormat = "yyyy/MM/dd"
     return formatter.string(from: date)
 }
+
+let source = EventKitSource()
+
+do {
+    try await source.requestAccess()
+} catch {
+    FileHandle.standardError.write(Data("\(error)\n".utf8))
+    exit(1)
+}
+
+if flags.contains("--diagnose") {
+
+    print("")
+    print("Calendars")
+
+    for calendar in source.calendars() {
+        let access = calendar.isWritable ? "writable" : "read-only"
+        let subscribed = calendar.isSubscribed ? ", subscribed" : ""
+        print("  \(calendar.source) / \(calendar.title)")
+        print("      \(calendar.kind), \(access)\(subscribed)")
+    }
+
+    // The whole tool rests on creationDate being populated, and
+    // whether it is depends on the account an entry came from rather
+    // than on anything here. So: count.
+    let wide = FetchPlanner.standard.plan(for: range, timeZone: timeZone)
+
+    print("")
+    print("Reading \(day(wide.span.start)) to \(day(wide.span.end))"
+          + " in \(wide.windows.count) queries...")
+
+    let all = source.entries(matching: wide)
+
+    var missingByCalendar: [String: Int] = [:]
+    var totalByCalendar: [String: Int] = [:]
+    var dated: [Date] = []
+
+    for entry in all {
+        totalByCalendar[entry.calendarTitle, default: 0] += 1
+
+        if let created = entry.creationDate {
+            dated.append(created)
+        } else {
+            missingByCalendar[entry.calendarTitle, default: 0] += 1
+        }
+    }
+
+    print("")
+    print("Creation dates")
+    print("  \(all.count) entries, \(dated.count) with a creation date")
+
+    if let earliest = dated.min(), let latest = dated.max() {
+        print("  earliest written \(stamp(earliest))")
+        print("  latest written   \(stamp(latest))")
+    }
+
+    if missingByCalendar.isEmpty {
+        print("  none missing")
+    } else {
+        print("  missing:")
+        for (calendar, count) in missingByCalendar.sorted(by: { $0.key < $1.key }) {
+            let total = totalByCalendar[calendar] ?? count
+            print("    \(calendar): \(count) of \(total)")
+        }
+    }
+
+    var byRole: [String: Int] = [:]
+    for entry in all {
+        byRole[entry.role?.rawValue ?? "neither", default: 0] += 1
+    }
+
+    print("")
+    print("Roles")
+    for (role, count) in byRole.sorted(by: { $0.key < $1.key }) {
+        print("  \(role): \(count)")
+    }
+
+    print("")
+    exit(0)
+}
+
+let planner = FetchPlanner.standard
+let plan = planner.plan(for: range, timeZone: timeZone)
+let log = source.log(
+    createdIn: range, roles: roles, planner: planner, timeZone: timeZone
+)
 
 print("")
 print(startDay == endDay ? startDay : "\(startDay) - \(endDay)")

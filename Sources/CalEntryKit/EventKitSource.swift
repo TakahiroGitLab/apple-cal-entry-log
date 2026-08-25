@@ -89,6 +89,18 @@ public final class EventKitSource {
         return collected.entries
     }
 
+    /// What EventKit can see, before any filtering.
+    ///
+    /// Worth having separately: whether an entry carries a creation
+    /// date at all is decided by the account it came from, not by this
+    /// code, and that is the one thing the whole tool rests on.
+    public func calendars() -> [CalendarSummary] {
+
+        store.calendars(for: .event)
+            .map(CalendarSummary.init)
+            .sorted { ($0.source, $0.title) < ($1.source, $1.title) }
+    }
+
     /// The whole job: search, filter by creation date, tag by role.
     public func log(
         createdIn range: DayRange,
@@ -105,6 +117,37 @@ public final class EventKitSource {
             createdIn: range,
             roles: roles
         )
+    }
+}
+
+
+/// One calendar, as far as this tool cares.
+public struct CalendarSummary: Sendable, Equatable {
+
+    public let title: String
+    public let source: String
+    public let kind: String
+    public let isWritable: Bool
+    public let isSubscribed: Bool
+
+    init(_ calendar: EKCalendar) {
+        self.title = calendar.title
+        self.source = calendar.source?.title ?? "(no source)"
+        self.kind = Self.describe(calendar.source?.sourceType)
+        self.isWritable = calendar.allowsContentModifications
+        self.isSubscribed = calendar.isSubscribed
+    }
+
+    private static func describe(_ type: EKSourceType?) -> String {
+        switch type {
+        case .local: return "local"
+        case .exchange: return "exchange"
+        case .calDAV: return "caldav"
+        case .mobileMe: return "mobileme"
+        case .subscribed: return "subscribed"
+        case .birthdays: return "birthdays"
+        default: return "unknown"
+        }
     }
 }
 
