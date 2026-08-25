@@ -57,7 +57,7 @@ the same name. A real app later would need
 swift run core-tests
 ```
 
-120 checks, no dependencies, and no Xcode: neither XCTest nor
+127 checks, no dependencies, and no Xcode: neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about 100 lines and prints
@@ -135,6 +135,14 @@ lines; the postcode and "Japan" are dropped, and a country that is
 *not* Japan is kept, because that is exactly the sort of thing worth
 seeing. Notes are cut to 50 characters on one line. The role is named
 only when more than one is present.
+
+Links are named, not spelled out. An entry written from an invitation
+carries a `message:` URL back to the mail it came from, which in full
+is a line of message-id and no information; it shows as "email", and
+the listing wraps it in an OSC 8 escape so terminals that understand
+one make it clickable. A web link shows its host. Terminals that do
+not understand OSC 8 -- Terminal.app among them -- just print the
+label, and a redirected run stays plain text.
 
 An entry with nothing to say on a line does not print that line.
 

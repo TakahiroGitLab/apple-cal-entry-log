@@ -11,5 +11,6 @@ mailtoAddressTests(harness)
 durationLabelTests(harness)
 noteSummaryTests(harness)
 locationLabelTests(harness)
+linkLabelTests(harness)
 
 exit(harness.report())

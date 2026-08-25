@@ -82,6 +82,23 @@ let day: (Date) -> String = { date in
     return formatter.string(from: date)
 }
 
+/// Terminals that understand OSC 8 turn the text into a link;
+/// those that do not ignore the sequence. Skipped when the output is
+/// not a terminal, so a redirected run stays plain text.
+let outputIsATerminal = isatty(FileHandle.standardOutput.fileDescriptor) == 1
+
+func hyperlink(_ text: String, to url: URL) -> String {
+
+    guard outputIsATerminal else { return text }
+
+    let escape = "\u{1B}"
+
+    return escape + "]8;;" + url.absoluteString + escape + "\\"
+        + text
+        + escape + "]8;;" + escape + "\\"
+}
+
+
 /// When an entry runs, as one line: the start, the end in whichever
 /// form is not repetitive, and how long that comes to.
 func whenLine(_ entry: CalendarEntry) -> String? {
@@ -275,8 +292,8 @@ for entry in log {
         print("    note:      \(note)")
     }
 
-    if let url = entry.entry.url {
-        print("    url:       \(url.absoluteString)")
+    if let url = entry.entry.url, let label = LinkLabel.describe(url) {
+        print("    link:      \(hyperlink(label, to: url))")
     }
 }
 
