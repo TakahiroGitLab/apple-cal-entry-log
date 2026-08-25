@@ -4,7 +4,7 @@ import Foundation
 /// to spare.
 public enum NoteSummary {
 
-    public static let defaultLimit = 90
+    public static let defaultLimit = 50
 
     /// Notes flattened onto one line and cut to length, or nil when
     /// there is nothing to show.

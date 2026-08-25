@@ -57,7 +57,7 @@ the same name. A real app later would need
 swift run core-tests
 ```
 
-106 checks, no dependencies, and no Xcode: neither XCTest nor
+120 checks, no dependencies, and no Xcode: neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about 100 lines and prints
@@ -126,6 +126,17 @@ listing tags entries with their role only when more than one role is
 present. An always-empty filter is a dead control, and a filter that
 appears the day a shared calendar turns up needs no setting and no
 second thought.
+
+## Reading, not archiving
+
+The listing shows what the reader does not already know. A location
+from Maps arrives as name, postal address and country across three
+lines; the postcode and "Japan" are dropped, and a country that is
+*not* Japan is kept, because that is exactly the sort of thing worth
+seeing. Notes are cut to 50 characters on one line. The role is named
+only when more than one is present.
+
+An entry with nothing to say on a line does not print that line.
 
 ## Next
 

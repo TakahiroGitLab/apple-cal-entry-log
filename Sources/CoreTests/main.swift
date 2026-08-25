@@ -10,5 +10,6 @@ fetchPlanTests(harness)
 mailtoAddressTests(harness)
 durationLabelTests(harness)
 noteSummaryTests(harness)
+locationLabelTests(harness)
 
 exit(harness.report())

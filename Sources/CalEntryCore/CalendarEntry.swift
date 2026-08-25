@@ -140,13 +140,9 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         NoteSummary.oneLine(notes)
     }
 
-    /// A location worth printing, rather than an empty string.
+    /// The location, minus the postcode and the country.
     public var locationLabel: String? {
-        guard let location else { return nil }
-
-        let trimmed = location.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        return trimmed.isEmpty ? nil : trimmed
+        LocationLabel.tidy(location)
     }
 
     /// "iCloud / Work", or just the title when there is no account to
