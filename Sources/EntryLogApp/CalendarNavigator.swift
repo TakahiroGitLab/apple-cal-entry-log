@@ -4,6 +4,9 @@ import CalEntryCore
 
 /// Sends Calendar to the day an entry falls on.
 ///
+/// The day, and nothing else: Calendar's view mode is the user's
+/// setting, and switching it to day view would outlast the visit.
+///
 /// Selecting the entry itself is not on offer. Calendar's scripting
 /// dictionary can find an event by its uid, but only by scanning, and
 /// a scan across these calendars ran for over two minutes without
@@ -46,7 +49,6 @@ enum CalendarNavigator {
             set seconds of d to 0
             tell application "Calendar"
                 activate
-                switch view to day view
                 view calendar at d
             end tell
             """

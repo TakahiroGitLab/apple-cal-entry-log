@@ -27,10 +27,10 @@ The window takes a range, has Yesterday and Today to hand, and lists
 what was written down in it. Ticking a role filters what is already
 loaded rather than searching again. It reads again by itself when the
 calendar changes -- an entry added here or arriving from the phone --
-and when the window comes back to the front, so the reload button is
-only ever a retry.
+so the reload button is only ever a retry.
 
-Double-click a row to send Calendar to that day, in day view.
+Double-click a row to send Calendar to that day, leaving its view
+mode alone.
 Selecting the entry itself is not on offer: Calendar's scripting can
 find an event by its uid, but only by scanning, and a scan across
 these calendars ran for two minutes without finishing. The

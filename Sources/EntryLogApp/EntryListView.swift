@@ -37,15 +37,6 @@ struct EntryListView: View {
                 model.reloadSoon()
             }
         }
-        .task {
-            // Coming back to the window is as good a moment as any to
-            // be sure of what it is showing.
-            for await _ in NotificationCenter.default.notifications(
-                named: NSApplication.didBecomeActiveNotification
-            ) {
-                model.reloadSoon()
-            }
-        }
     }
 
 
