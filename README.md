@@ -9,14 +9,29 @@ for Google Calendar, rebuilt on EventKit.
 
 ## Status
 
-Step 1 of the port: the entry model and the filtering and role rules.
-No EventKit yet -- nothing here imports it.
+The logic, the EventKit adapter, and a command line to run it. Not yet
+tried against a real calendar.
+
+```
+swift run entry-log                       # today
+swift run entry-log 2026-08-18 2026-08-20 # a range
+swift run entry-log --created             # only what I wrote
+```
+
+The first run asks for calendar access. A command-line tool has no
+bundle of its own, so macOS attributes the request to the terminal it
+was launched from -- expect a prompt naming Terminal, not `entry-log`,
+and look under System Settings > Privacy & Security > Calendars for
+the same name. A real app later would need
+`NSCalendarsFullAccessUsageDescription` in its own Info.plist.
 
 ## Layout
 
 | | |
 | --- | --- |
-| `Sources/CalEntryCore` | The logic. Pure Foundation. |
+| `Sources/CalEntryCore` | The logic. Pure Foundation, no EventKit. |
+| `Sources/CalEntryKit` | The EventKit adapter, and nothing else. |
+| `Sources/EntryLogCLI` | The command line. |
 | `Sources/CoreTests` | The tests, as a runnable executable. |
 
 ```
@@ -83,7 +98,7 @@ stopped. Saying so is more honest than implying it looked everywhere.
 
 ## Next
 
-- EventKit adapter: authorisation, `predicateForEvents`, `EKEvent` ->
-  `CalendarEntry`.
-- A front end. Note this is per-Mac: the iPhone would need an actual
+- Try it against a real calendar, on a Mac that has one.
+- A way to open an entry in Calendar from the list.
+- An interface. Note this is per-Mac: the iPhone would need an actual
   app.

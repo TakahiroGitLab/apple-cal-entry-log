@@ -3,9 +3,11 @@ import PackageDescription
 
 let package = Package(
     name: "AppleCalEntryLog",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     products: [
         .library(name: "CalEntryCore", targets: ["CalEntryCore"]),
+        .library(name: "CalEntryKit", targets: ["CalEntryKit"]),
+        .executable(name: "entry-log", targets: ["EntryLogCLI"]),
         .executable(name: "core-tests", targets: ["CoreTests"])
     ],
     targets: [
@@ -15,11 +17,20 @@ let package = Package(
         // test events can never be backdated into a range.
         .target(name: "CalEntryCore"),
 
+        // The only place that knows EventKit exists. Conversion
+        // and the store query, no decisions.
+        .target(name: "CalEntryKit", dependencies: ["CalEntryCore"]),
+
         // Not a .testTarget: neither XCTest nor swift-testing ships
         // with the Command Line Tools, and reaching Xcode's copy needs
         // a licence agreement and sudo. A plain executable with a
         // small harness runs on any Mac with swift installed.
         //   swift run core-tests
+        .executableTarget(
+            name: "EntryLogCLI",
+            dependencies: ["CalEntryCore", "CalEntryKit"]
+        ),
+
         .executableTarget(name: "CoreTests", dependencies: ["CalEntryCore"])
     ]
 )
