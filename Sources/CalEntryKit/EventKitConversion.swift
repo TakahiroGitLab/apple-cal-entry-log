@@ -16,6 +16,7 @@ extension CalendarEntry {
             // is what makes it the right key to deduplicate on: the
             // entry was written down once.
             id: event.calendarItemIdentifier,
+            externalId: event.calendarItemExternalIdentifier,
             title: event.title,
             creationDate: event.creationDate,
             startDate: event.startDate,

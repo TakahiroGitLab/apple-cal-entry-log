@@ -9,8 +9,24 @@ for Google Calendar, rebuilt on EventKit.
 
 ## Status
 
-The logic, the EventKit adapter, and a command line to run it. Not yet
-tried against a real calendar.
+A window, a command line, and the logic behind both. Working against a
+real iCloud calendar.
+
+```
+./Scripts/make-app.sh && open build/EntryLog.app
+```
+
+That builds `EntryLog.app` -- no Xcode: SwiftPM builds the binary
+against the Command Line Tools SDK and the script assembles the bundle
+around it, ad-hoc signed. The bundle matters for more than
+double-clicking: it carries the Info.plist, and the Info.plist is what
+lets macOS ask for calendar access in this app's name instead of the
+terminal's.
+
+The window takes a range, has Yesterday and Today to hand, and lists
+what was written down in it. Ticking a role filters what is already
+loaded rather than searching again. Double-click a row, or use its
+context menu, to open the entry in Calendar.
 
 ```
 swift run entry-log                       # today
@@ -50,6 +66,7 @@ the same name. A real app later would need
 | --- | --- |
 | `Sources/CalEntryCore` | The logic. Pure Foundation, no EventKit. |
 | `Sources/CalEntryKit` | The EventKit adapter, and nothing else. |
+| `Sources/EntryLogApp` | The SwiftUI window. |
 | `Sources/EntryLogCLI` | The command line. |
 | `Sources/CoreTests` | The tests, as a runnable executable. |
 
@@ -57,7 +74,7 @@ the same name. A real app later would need
 swift run core-tests
 ```
 
-127 checks, no dependencies, and no Xcode: neither XCTest nor
+137 checks, no dependencies, and no Xcode: neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about 100 lines and prints
@@ -148,6 +165,10 @@ An entry with nothing to say on a line does not print that line.
 
 ## Next
 
-- A way to open an entry in Calendar from the list.
-- An interface. Note this is per-Mac: the iPhone would need an actual
-  app.
+- Live with it for a while.
+- If it is ever published: notes should show as a marker rather than
+  their opening line, revealed on hover or a click. A calendar note is
+  as likely to hold a door code as a reminder, and a listing that puts
+  one on screen is a listing that puts one in a screenshot.
+
+Note this is per-Mac. The iPhone would need an actual app.

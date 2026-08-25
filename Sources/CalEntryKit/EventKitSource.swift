@@ -37,7 +37,12 @@ public final class EventKitSource {
     ///
     /// Write-only access counts as refused: it is enough to add an
     /// entry and not enough to read one back, which is all this does.
-    public func requestAccess() async throws {
+    ///
+    /// Static because authorisation belongs to the process rather than
+    /// to any one store, and because asking through an instance would
+    /// mean handing a store that is not Sendable across to whichever
+    /// thread the system answers on.
+    public static func requestAccess() async throws {
 
         let status = EKEventStore.authorizationStatus(for: .event)
 
@@ -51,7 +56,7 @@ public final class EventKitSource {
         let granted: Bool
 
         do {
-            granted = try await store.requestFullAccessToEvents()
+            granted = try await EKEventStore().requestFullAccessToEvents()
         } catch {
             throw CalendarAccessError.failed(error.localizedDescription)
         }

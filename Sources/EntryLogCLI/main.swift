@@ -132,7 +132,7 @@ func whenLine(_ entry: CalendarEntry) -> String? {
 let source = EventKitSource()
 
 do {
-    try await source.requestAccess()
+    try await EventKitSource.requestAccess()
 } catch {
     FileHandle.standardError.write(Data("\(error)\n".utf8))
     exit(1)

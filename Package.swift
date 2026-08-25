@@ -7,6 +7,7 @@ let package = Package(
     products: [
         .library(name: "CalEntryCore", targets: ["CalEntryCore"]),
         .library(name: "CalEntryKit", targets: ["CalEntryKit"]),
+        .executable(name: "EntryLog", targets: ["EntryLogApp"]),
         .executable(name: "entry-log", targets: ["EntryLogCLI"]),
         .executable(name: "core-tests", targets: ["CoreTests"])
     ],
@@ -26,6 +27,11 @@ let package = Package(
         // a licence agreement and sudo. A plain executable with a
         // small harness runs on any Mac with swift installed.
         //   swift run core-tests
+        .executableTarget(
+            name: "EntryLogApp",
+            dependencies: ["CalEntryCore", "CalEntryKit"]
+        ),
+
         .executableTarget(
             name: "EntryLogCLI",
             dependencies: ["CalEntryCore", "CalEntryKit"]

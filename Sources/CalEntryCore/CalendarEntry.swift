@@ -58,6 +58,12 @@ public struct Participant: Sendable, Equatable {
 public struct CalendarEntry: Sendable, Equatable, Identifiable {
 
     public var id: String
+
+    /// The identifier that survives a sync, which is the one Calendar
+    /// accepts in a link. Nil for an entry that has never left this
+    /// Mac.
+    public var externalId: String?
+
     public var title: String?
 
     /// When the entry was written down -- the axis the whole tool is
@@ -97,6 +103,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
 
     public init(
         id: String,
+        externalId: String? = nil,
         title: String? = nil,
         creationDate: Date? = nil,
         startDate: Date? = nil,
@@ -112,6 +119,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         attendees: [Participant] = []
     ) {
         self.id = id
+        self.externalId = externalId
         self.title = title
         self.creationDate = creationDate
         self.startDate = startDate
@@ -125,6 +133,11 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.calendarIsWritable = calendarIsWritable
         self.organizer = organizer
         self.attendees = attendees
+    }
+
+    /// A link that opens this entry in Calendar.
+    public var calendarAppLink: URL? {
+        CalendarAppLink.show(externalId)
     }
 
     /// How long it runs: "2h", "45m", "3 days".

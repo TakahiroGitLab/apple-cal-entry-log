@@ -12,5 +12,7 @@ durationLabelTests(harness)
 noteSummaryTests(harness)
 locationLabelTests(harness)
 linkLabelTests(harness)
+calendarAppLinkTests(harness)
+dayRangeFromDatesTests(harness)
 
 exit(harness.report())

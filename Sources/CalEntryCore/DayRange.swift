@@ -78,6 +78,61 @@ extension DayRange {
         return DayRange(start: start, endExclusive: endExclusive)
     }
 
+    /// Build a range from two instants, taking the whole day each
+    /// one falls in.
+    ///
+    /// What a date picker hands over is a moment, not a day, and the
+    /// moment's time of day is an accident of when it was picked.
+    public static func covering(
+        _ start: Date,
+        through end: Date,
+        timeZone: TimeZone,
+        calendar: Calendar = .init(identifier: .gregorian)
+    ) throws -> DayRange {
+
+        var calendar = calendar
+        calendar.timeZone = timeZone
+
+        let first = calendar.startOfDay(for: start)
+        let last = calendar.startOfDay(for: end)
+
+        guard first <= last else {
+            throw DayRangeError.startAfterEnd(
+                start: day(first, calendar: calendar),
+                end: day(last, calendar: calendar)
+            )
+        }
+
+        guard let endExclusive = calendar.date(
+            byAdding: .day, value: 1, to: last
+        ) else {
+            throw DayRangeError.malformedDay(day(last, calendar: calendar))
+        }
+
+        return DayRange(start: first, endExclusive: endExclusive)
+    }
+
+    /// A date as `yyyy-MM-dd`, for saying which one went wrong.
+    public static func day(
+        _ date: Date,
+        timeZone: TimeZone
+    ) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+
+        return day(date, calendar: calendar)
+    }
+
+    private static func day(_ date: Date, calendar: Calendar) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        return formatter.string(from: date)
+    }
+
     /// Midnight on a single day, in the calendar's time zone.
     private static func midnight(
         on day: String,
