@@ -44,14 +44,12 @@ struct EntryListView: View {
         VStack(alignment: .leading, spacing: 10) {
 
             HStack(spacing: 8) {
-                DatePicker("", selection: $model.startDay, displayedComponents: .date)
-                    .labelsHidden()
+                dayField(.start, selection: $model.startDay)
 
                 Text("to")
                     .foregroundStyle(.secondary)
 
-                DatePicker("", selection: $model.endDay, displayedComponents: .date)
-                    .labelsHidden()
+                dayField(.end, selection: $model.endDay)
 
                 Spacer()
 
@@ -85,6 +83,31 @@ struct EntryListView: View {
             }
         }
         .padding(12)
+    }
+
+    /// A date field with its own pair of arrows.
+    ///
+    /// The stepper is separate from the field on purpose. The stock
+    /// `.stepperField` picker steps whichever component is selected,
+    /// which is the year until something is clicked -- so the first
+    /// press of the arrow moved the range twelve months. Stepping is
+    /// by the day, always, because that is the size of the question
+    /// this window answers.
+    private func dayField(
+        _ edge: EntryLogModel.Edge, selection: Binding<Date>
+    ) -> some View {
+        HStack(spacing: 2) {
+            DatePicker("", selection: selection, displayedComponents: .date)
+                .labelsHidden()
+                .datePickerStyle(.field)
+
+            Stepper(
+                "",
+                onIncrement: { model.nudge(edge, byDays: 1) },
+                onDecrement: { model.nudge(edge, byDays: -1) }
+            )
+            .labelsHidden()
+        }
     }
 
     private func preset(_ title: String, daysAgo: Int) -> some View {

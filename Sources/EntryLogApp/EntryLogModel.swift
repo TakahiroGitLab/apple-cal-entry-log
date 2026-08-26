@@ -58,6 +58,38 @@ final class EntryLogModel {
         showsRoleFilter ? loaded.filter { roles.contains($0.role) } : loaded
     }
 
+    /// Which end of the range a nudge moves.
+    enum Edge { case start, end }
+
+    /// Move one end of the range by whole days.
+    ///
+    /// The other end is dragged along rather than crossed. Start and
+    /// end are equal most of the time -- that is what the presets
+    /// leave behind -- and an arrow that refuses to move a one-day
+    /// range is an arrow that does nothing.
+    func nudge(_ edge: Edge, byDays days: Int) {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+
+        switch edge {
+        case .start:
+            guard let moved = calendar.date(
+                byAdding: .day, value: days, to: startDay
+            ) else { return }
+
+            startDay = moved
+            if moved > endDay { endDay = moved }
+
+        case .end:
+            guard let moved = calendar.date(
+                byAdding: .day, value: days, to: endDay
+            ) else { return }
+
+            endDay = moved
+            if moved < startDay { startDay = moved }
+        }
+    }
+
     func show(daysAgo: Int) {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
