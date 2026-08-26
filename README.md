@@ -222,3 +222,7 @@ log, quietly, by design.
   one on screen is a listing that puts one in a screenshot.
 
 This is per-Mac. The iPhone would need an actual app.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).

@@ -7,31 +7,31 @@ func locationLabelTests(_ h: Harness) {
 
         h.test("What Maps puts there is reduced to the useful part") {
             let fromMaps = """
-                日進市スポーツセンター
-                〒470-0131 愛知県日進市岩崎町阿良池30
+                桜井市スポーツセンター
+                〒123-4567 桜県桜井市桜町架空池30
                 Japan
                 """
 
             h.equal(LocationLabel.tidy(fromMaps),
-                    "日進市スポーツセンター, 愛知県日進市岩崎町阿良池30",
+                    "桜井市スポーツセンター, 桜県桜井市桜町架空池30",
                     "tidied")
         }
 
         h.test("A postcode goes whether or not it has its mark") {
-            h.equal(LocationLabel.tidy("〒470-0131 愛知県日進市"),
-                    "愛知県日進市", "with the mark")
-            h.equal(LocationLabel.tidy("〒4700131 愛知県日進市"),
-                    "愛知県日進市", "without the dash")
-            h.equal(LocationLabel.tidy("470-0131 愛知県日進市"),
-                    "愛知県日進市", "bare")
+            h.equal(LocationLabel.tidy("〒123-4567 桜県桜井市"),
+                    "桜県桜井市", "with the mark")
+            h.equal(LocationLabel.tidy("〒1234567 桜県桜井市"),
+                    "桜県桜井市", "without the dash")
+            h.equal(LocationLabel.tidy("123-4567 桜県桜井市"),
+                    "桜県桜井市", "bare")
         }
 
         h.test("A street number is not mistaken for a postcode") {
             // Three digits, a dash and four would match; 1-2-3 must
             // not, and neither must a number attached to a name.
-            h.equal(LocationLabel.tidy("愛知県日進市岩崎町 1-2-3"),
-                    "愛知県日進市岩崎町 1-2-3", "block number")
-            h.equal(LocationLabel.tidy("阿良池30"), "阿良池30", "house number")
+            h.equal(LocationLabel.tidy("桜県桜井市桜町 1-2-3"),
+                    "桜県桜井市桜町 1-2-3", "block number")
+            h.equal(LocationLabel.tidy("架空池30"), "架空池30", "house number")
         }
 
         h.test("The country goes, as a line or on the end of one") {
@@ -55,7 +55,7 @@ func locationLabelTests(_ h: Harness) {
         h.test("Nothing worth showing shows nothing") {
             h.isNil(LocationLabel.tidy(nil), "no location")
             h.isNil(LocationLabel.tidy("   \n  "), "only whitespace")
-            h.isNil(LocationLabel.tidy("〒470-0131\nJapan"), "only a postcode")
+            h.isNil(LocationLabel.tidy("〒123-4567\nJapan"), "only a postcode")
         }
     }
 }
