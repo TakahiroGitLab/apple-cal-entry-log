@@ -80,6 +80,12 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
 
     public var isAllDay: Bool
 
+    /// Whether this is one entry or a repeating series. It matters
+    /// only when jumping to Calendar: every occurrence of a series
+    /// shares one identifier, so asking Calendar to show it lands on
+    /// whichever occurrence it picks rather than the one on screen.
+    public var isRecurring: Bool
+
     public var location: String?
     public var notes: String?
     public var url: URL?
@@ -108,6 +114,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         startDate: Date? = nil,
         endDate: Date? = nil,
         isAllDay: Bool = false,
+        isRecurring: Bool = false,
         location: String? = nil,
         notes: String? = nil,
         url: URL? = nil,
@@ -124,6 +131,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.startDate = startDate
         self.endDate = endDate
         self.isAllDay = isAllDay
+        self.isRecurring = isRecurring
         self.location = location
         self.notes = notes
         self.url = url
@@ -132,6 +140,17 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.calendarIsWritable = calendarIsWritable
         self.organizer = organizer
         self.attendees = attendees
+    }
+
+    /// Whether Calendar can be asked to select this entry itself,
+    /// rather than merely be sent to the month it falls in.
+    ///
+    /// Wants a sync identifier to look it up by and a calendar to look
+    /// it up in, and wants the entry not to repeat.
+    public var isPinpointable: Bool {
+        guard !isRecurring, !calendarTitle.isEmpty else { return false }
+        guard let externalId, !externalId.isEmpty else { return false }
+        return true
     }
 
     /// How long it runs: "2h", "45m", "3 days".

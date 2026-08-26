@@ -22,6 +22,7 @@ extension CalendarEntry {
             startDate: event.startDate,
             endDate: event.endDate,
             isAllDay: event.isAllDay,
+            isRecurring: event.hasRecurrenceRules,
             location: event.location,
             notes: event.notes,
             url: event.url,

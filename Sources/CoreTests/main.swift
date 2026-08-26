@@ -13,5 +13,6 @@ noteSummaryTests(harness)
 locationLabelTests(harness)
 linkLabelTests(harness)
 dayRangeFromDatesTests(harness)
+pinpointTests(harness)
 
 exit(harness.report())

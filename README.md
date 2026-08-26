@@ -30,8 +30,10 @@ is already loaded rather than searching again. It reads again by itself
 whenever the calendar changes -- an entry added here, or arriving from
 the phone -- so the reload button (⌘R) is only ever a retry.
 
-Double-click a row to send Calendar to that day. There is also a
-command line, which prints the same thing:
+Double-click a row to open it in Calendar: the month it falls in,
+with the entry itself selected. A repeating entry is an exception --
+the month, unhighlighted -- for the reason under the findings below.
+There is also a command line, which prints the same thing:
 
 ```
 swift run entry-log                       # today
@@ -166,7 +168,7 @@ A row with nothing to say on a line does not print that line.
 
 ## What EventKit would not do
 
-Five findings that cost real time, kept here so they are not
+Six findings that cost real time, kept here so they are not
 rediscovered.
 
 **A store made before access is granted stays empty afterwards.** The
@@ -176,10 +178,21 @@ store is now made on first use, after authorisation, and reset before
 every read -- which is also what lets a reload pick up an entry added
 in Calendar a minute ago.
 
-**`ical://ekevent/<id>` ignores the id.** It opens Calendar and goes
-nowhere. Calendar's scripting can find an event by its uid, but only by
-scanning, and a scan across these calendars ran two minutes without
-finishing.
+**`ical://ekevent/<id>` ignores the id** -- with Spotlight's
+`?method=show&options=more` on the end as much as without. Calendar
+opens and stays where it was. What does work is AppleScript, and which
+AppleScript matters by two orders of magnitude: `first event whose uid
+= ...` scans, and a scan across these calendars ran two minutes without
+finishing, while `event id "..." of calendar "..."` is a direct lookup
+and answers in a quarter of a second. `show` on the result selects the
+entry in month view without leaving it.
+
+**A repeating entry cannot be selected, only landed near.** Every
+occurrence of a series carries the one identifier, and Calendar's
+scripting has no way to name an occurrence, so `show` picks whichever
+it likes -- April, for an entry the log is listing under July. Those
+rows are sent to the month and left unhighlighted, which is the lesser
+wrong.
 
 **`view calendar at` honours a date and ignores the time.** So day view
 lands on the right day scrolled to the wrong hour -- a four o'clock
