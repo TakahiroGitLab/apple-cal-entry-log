@@ -126,6 +126,14 @@ be neither written by you nor an invitation to you, since an invitation
 has to land somewhere it can be accepted, so skipping holidays and
 birthdays loses nothing and saves the reading.
 
+Of those, only the ticked ones. The filter sits above the listing with
+All and None beside it, and unticking a calendar keeps it out of the
+*search* rather than out of the results -- a calendar you did not want
+to see is a calendar there was no reason to open. The choice is
+remembered between launches and kept as the exclusions, so a calendar
+added next month arrives switched on. It appears only where there is
+more than one calendar to choose between.
+
 **The invited role, with nothing shared.** On the account this was
 built against nothing is shared, so nothing is an invitation, and the
 role is correctly empty rather than broken. The answer is not to remove

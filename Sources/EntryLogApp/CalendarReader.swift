@@ -18,18 +18,34 @@ actor CalendarReader {
         try await EventKitSource.requestAccess()
     }
 
-    func log(createdIn range: DayRange, timeZone: TimeZone) -> Reading {
+    func log(
+        createdIn range: DayRange,
+        timeZone: TimeZone,
+        limitedTo calendars: Set<String>?
+    ) -> Reading {
 
+        let source = ready()
+
+        return source.log(
+            createdIn: range,
+            planner: .standard,
+            timeZone: timeZone,
+            limitedTo: calendars
+        )
+    }
+
+    /// The writable calendars, for the filter to offer.
+    func calendars() -> [CalendarSummary] {
+        ready().writableCalendarSummaries()
+    }
+
+    private func ready() -> EventKitSource {
         let source = self.source ?? EventKitSource()
         self.source = source
 
         // Whatever it has cached is at best one refresh out of date.
         source.refresh()
 
-        return source.log(
-            createdIn: range,
-            planner: .standard,
-            timeZone: timeZone
-        )
+        return source
     }
 }

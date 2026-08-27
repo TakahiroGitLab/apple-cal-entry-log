@@ -83,8 +83,44 @@ struct EntryListView: View {
 
                 Spacer()
             }
+
+            if model.showsCalendarFilter { calendarFilter }
         }
         .padding(12)
+    }
+
+    /// Which calendars to read, pinned above the listing.
+    ///
+    /// Unticking one keeps it out of the search rather than out of the
+    /// results: a calendar the reader does not want to see is a
+    /// calendar there is no reason to open.
+    private var calendarFilter: some View {
+        VStack(alignment: .leading, spacing: 6) {
+
+            Divider()
+
+            WrapLayout {
+                Text("Calendars")
+                    .foregroundStyle(.secondary)
+
+                ForEach(model.calendars) { calendar in
+                    Toggle(calendar.title, isOn: Binding(
+                        get: { model.isReading(calendar) },
+                        set: { model.setReading(calendar, $0) }
+                    ))
+                    .toggleStyle(.checkbox)
+                    .help(calendar.label)
+                }
+
+                Button("All") { model.readEveryCalendar() }
+                    .buttonStyle(.link)
+                    .disabled(model.excludedCalendars.isEmpty)
+
+                Button("None") { model.readNoCalendar() }
+                    .buttonStyle(.link)
+                    .disabled(model.everyCalendarIsExcluded)
+            }
+        }
     }
 
     /// The same two commands the View menu carries, where the eye
@@ -217,6 +253,11 @@ struct EntryListView: View {
     }
 
     private var emptyReason: String {
+
+        if model.everyCalendarIsExcluded {
+            return "No calendars are ticked, so nothing was read."
+        }
+
         switch model.calendarsSearched {
         case 0:
             return "No calendars could be read. Check that Entry Log "

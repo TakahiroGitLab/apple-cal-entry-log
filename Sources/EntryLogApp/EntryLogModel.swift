@@ -21,6 +21,20 @@ final class EntryLogModel {
     /// and off from the menu afterwards.
     var isDemo: Bool = Launch.isDemo
 
+    /// The writable calendars, as offered by the filter. Empty until
+    /// the first read, since asking needs access.
+    private(set) var calendars: [CalendarSummary] = []
+
+    /// Which calendars are *not* to be read.
+    ///
+    /// Kept as the exclusions rather than the inclusions so that a
+    /// calendar added next month arrives switched on. Remembered
+    /// between launches: this is the machine that has the work
+    /// calendars on it, and that does not change day to day.
+    var excludedCalendars: Set<String> = CalendarFilter.remembered() {
+        didSet { CalendarFilter.remember(excludedCalendars) }
+    }
+
     /// Which roles to show. Only ever offered when the results
     /// actually contain more than one.
     var roles: Set<EntryRole> = Set(EntryRole.allCases)
@@ -62,6 +76,42 @@ final class EntryLogModel {
             + "/"
             + DayRange.day(endDay, timeZone: timeZone)
             + (isDemo ? "/demo" : "")
+            + "/" + excludedCalendars.sorted().joined(separator: ",")
+    }
+
+    /// The calendars to read, or nil when none are excluded.
+    private var wantedCalendars: Set<String>? {
+        guard !excludedCalendars.isEmpty else { return nil }
+
+        return Set(calendars.map(\.id)).subtracting(excludedCalendars)
+    }
+
+    /// Whether the filter is worth showing. One calendar cannot be
+    /// filtered down to anything useful.
+    var showsCalendarFilter: Bool { calendars.count > 1 }
+
+    var everyCalendarIsExcluded: Bool {
+        !calendars.isEmpty && wantedCalendars?.isEmpty == true
+    }
+
+    func isReading(_ calendar: CalendarSummary) -> Bool {
+        !excludedCalendars.contains(calendar.id)
+    }
+
+    func setReading(_ calendar: CalendarSummary, _ wanted: Bool) {
+        if wanted {
+            excludedCalendars.remove(calendar.id)
+        } else {
+            excludedCalendars.insert(calendar.id)
+        }
+    }
+
+    func readEveryCalendar() {
+        excludedCalendars = []
+    }
+
+    func readNoCalendar() {
+        excludedCalendars = Set(calendars.map(\.id))
     }
 
     var availableRoles: Set<EntryRole> {
@@ -174,7 +224,11 @@ final class EntryLogModel {
             return
         }
 
-        let reading = await reader.log(createdIn: range, timeZone: timeZone)
+        calendars = await reader.calendars()
+
+        let reading = await reader.log(
+            createdIn: range, timeZone: timeZone, limitedTo: wantedCalendars
+        )
 
         // A search the user has already moved on from should not
         // overwrite the one they are waiting for.
@@ -193,13 +247,20 @@ final class EntryLogModel {
 
         let plan = FetchPlanner.standard.plan(for: range, timeZone: timeZone)
 
+        calendars = DemoLog.calendars
+
+        let wanted = wantedCalendars
+
         loaded = EntryLog.entries(
-            from: DemoLog.entries(timeZone: timeZone), createdIn: range
+            from: DemoLog.entries(timeZone: timeZone).filter { entry in
+                wanted.map { $0.contains(entry.calendarTitle) } ?? true
+            },
+            createdIn: range
         )
 
         searched = plan.span
         queries = plan.windows.count
-        calendarsSearched = 2
+        calendarsSearched = wanted?.count ?? calendars.count
         state = .ready
     }
 }

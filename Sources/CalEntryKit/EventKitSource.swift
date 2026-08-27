@@ -134,6 +134,14 @@ public final class EventKitSource {
     public func writableCalendars() -> [EKCalendar] {
         store.calendars(for: .event)
             .filter { $0.allowsContentModifications }
+            .sorted { ($0.source?.title ?? "", $0.title)
+                    < ($1.source?.title ?? "", $1.title) }
+    }
+
+    /// The same calendars, described rather than handed over, so that
+    /// the window can offer them without importing EventKit.
+    public func writableCalendarSummaries() -> [CalendarSummary] {
+        writableCalendars().map(CalendarSummary.init)
     }
 
     /// The whole job: search, filter by creation date, tag by role.
@@ -144,11 +152,20 @@ public final class EventKitSource {
         roles: Set<EntryRole> = Set(EntryRole.allCases),
         planner: FetchPlanner = .standard,
         timeZone: TimeZone = .current,
-        in calendars: [EKCalendar]? = nil
+        in calendars: [EKCalendar]? = nil,
+        // Nil searches every writable calendar. A set searches only
+        // those, and an empty one searches nothing at all -- which is
+        // what every box unticked should do.
+        limitedTo wanted: Set<String>? = nil
     ) -> Reading {
 
         let plan = planner.plan(for: range, timeZone: timeZone)
-        let searched = calendars ?? writableCalendars()
+
+        let available = calendars ?? writableCalendars()
+
+        let searched = wanted.map { ids in
+            available.filter { ids.contains($0.calendarIdentifier) }
+        } ?? available
 
         return Reading(
             entries: EntryLog.entries(
@@ -181,21 +198,17 @@ public struct Reading: Sendable {
 }
 
 
-/// One calendar, as far as this tool cares.
-public struct CalendarSummary: Sendable, Equatable {
-
-    public let title: String
-    public let source: String
-    public let kind: String
-    public let isWritable: Bool
-    public let isSubscribed: Bool
+extension CalendarSummary {
 
     init(_ calendar: EKCalendar) {
-        self.title = calendar.title
-        self.source = calendar.source?.title ?? "(no source)"
-        self.kind = Self.describe(calendar.source?.sourceType)
-        self.isWritable = calendar.allowsContentModifications
-        self.isSubscribed = calendar.isSubscribed
+        self.init(
+            id: calendar.calendarIdentifier,
+            title: calendar.title,
+            source: calendar.source?.title ?? "(no source)",
+            kind: Self.describe(calendar.source?.sourceType),
+            isWritable: calendar.allowsContentModifications,
+            isSubscribed: calendar.isSubscribed
+        )
     }
 
     private static func describe(_ type: EKSourceType?) -> String {

@@ -13,6 +13,14 @@ import Foundation
 /// because the command line can use it too.
 public enum DemoLog {
 
+    /// The invented calendars, so that the filter has something to
+    /// offer. Their identifiers are their titles, which is what lets
+    /// the demo be filtered without inventing a store as well.
+    public static let calendars: [CalendarSummary] = [
+        CalendarSummary(id: "Home", title: "Home", source: "iCloud"),
+        CalendarSummary(id: "Work", title: "Work", source: "iCloud")
+    ]
+
     public static func entries(
         around reference: Date = .now,
         timeZone: TimeZone = .current
