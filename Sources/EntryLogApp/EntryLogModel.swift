@@ -16,6 +16,11 @@ final class EntryLogModel {
     var startDay: Date = .now
     var endDay: Date = .now
 
+    /// Show an invented calendar instead of the real one. Starts on
+    /// when the app was launched with `--demo`, and can be turned on
+    /// and off from the menu afterwards.
+    var isDemo: Bool = Launch.isDemo
+
     /// Which roles to show. Only ever offered when the results
     /// actually contain more than one.
     var roles: Set<EntryRole> = Set(EntryRole.allCases)
@@ -56,6 +61,7 @@ final class EntryLogModel {
         DayRange.day(startDay, timeZone: timeZone)
             + "/"
             + DayRange.day(endDay, timeZone: timeZone)
+            + (isDemo ? "/demo" : "")
     }
 
     var availableRoles: Set<EntryRole> {
@@ -156,7 +162,7 @@ final class EntryLogModel {
 
         state = .loading
 
-        if Launch.isDemo {
+        if isDemo {
             showDemo(in: range)
             return
         }

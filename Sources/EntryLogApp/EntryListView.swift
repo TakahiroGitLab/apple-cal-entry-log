@@ -5,7 +5,7 @@ import CalEntryKit
 
 struct EntryListView: View {
 
-    @State private var model = EntryLogModel()
+    @Bindable var model: EntryLogModel
 
     private var formatting: Formatting {
         Formatting(timeZone: model.timeZone)
@@ -87,12 +87,9 @@ struct EntryListView: View {
         .padding(12)
     }
 
-    /// Two buttons and a hidden third.
-    ///
-    /// ⌘= as well as ⌘+, because the key is the same one and reaching
-    /// the plus printed on it means holding shift. Every other Mac
-    /// application accepts both; a reader who has to look at the
-    /// keyboard has already been let down.
+    /// The same two commands the View menu carries, where the eye
+    /// already is. The shortcuts live on the menu items, which is
+    /// where a reader looks for them.
     private var textSizeControls: some View {
         HStack(spacing: 2) {
 
@@ -101,7 +98,6 @@ struct EntryListView: View {
             } label: {
                 Image(systemName: "textformat.size.smaller")
             }
-            .keyboardShortcut("-")
             .help("Smaller text (⌘-)")
             .disabled(!model.textScale.canShrink)
 
@@ -110,19 +106,8 @@ struct EntryListView: View {
             } label: {
                 Image(systemName: "textformat.size.larger")
             }
-            .keyboardShortcut("+")
             .help("Larger text (⌘+)")
             .disabled(!model.textScale.canGrow)
-
-            Button("") { model.resize(by: 1) }
-                .keyboardShortcut("=")
-                .hidden()
-                .frame(width: 0)
-
-            Button("") { model.resetTextSize() }
-                .keyboardShortcut("0")
-                .hidden()
-                .frame(width: 0)
         }
     }
 
@@ -245,6 +230,15 @@ struct EntryListView: View {
     private var footer: some View {
         HStack {
             Text(count)
+
+            if model.isDemo {
+                // A screenshot of this should never be mistaken for a
+                // screenshot of somebody's calendar.
+                Text("demo data")
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(.tint.opacity(0.15), in: Capsule())
+            }
 
             Spacer()
 

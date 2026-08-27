@@ -42,8 +42,9 @@ swift run entry-log --created             # only what I wrote
 swift run entry-log --diagnose            # what EventKit can see
 ```
 
-The window also takes `--demo`, which fills it with an invented
-calendar and never opens the store:
+**View > Demo Data** (⌥⌘D) fills the window with an invented calendar
+and never opens the store. The same thing at launch, for a copy that
+should open that way:
 
 ```
 open -a /Applications/EntryLog.app --args --demo
@@ -52,7 +53,9 @@ open -a /Applications/EntryLog.app --args --demo
 For screenshots. A listing of a real calendar carries names,
 addresses, and whatever the notes happen to hold, so every screenshot
 of the working tool is unpublishable. It is also the only way to see
-the window on a Mac that has not granted access.
+the window on a Mac that has not granted access. The footer says
+`demo data` while it is on, so a screenshot cannot be mistaken for
+somebody's calendar.
 
 `--diagnose` is worth running first on any new account. It lists the
 calendars EventKit can reach and counts how many entries carry a
