@@ -25,7 +25,12 @@ final class EntryLogModel {
     /// the first read, since asking needs access.
     private(set) var calendars: [CalendarSummary] = []
 
-    /// Which calendars are *not* to be read.
+    /// Which calendars are not to be shown.
+    ///
+    /// A filter over what has already been read, not over what gets
+    /// read: skipping calendars in the search saves about forty
+    /// milliseconds out of two hundred, which is not worth making
+    /// every tick of a box wait for a fresh read.
     ///
     /// Kept as the exclusions rather than the inclusions so that a
     /// calendar added next month arrives switched on. Remembered
@@ -76,14 +81,6 @@ final class EntryLogModel {
             + "/"
             + DayRange.day(endDay, timeZone: timeZone)
             + (isDemo ? "/demo" : "")
-            + "/" + excludedCalendars.sorted().joined(separator: ",")
-    }
-
-    /// The calendars to read, or nil when none are excluded.
-    private var wantedCalendars: Set<String>? {
-        guard !excludedCalendars.isEmpty else { return nil }
-
-        return Set(calendars.map(\.id)).subtracting(excludedCalendars)
     }
 
     /// Whether the filter is worth showing. One calendar cannot be
@@ -91,7 +88,8 @@ final class EntryLogModel {
     var showsCalendarFilter: Bool { calendars.count > 1 }
 
     var everyCalendarIsExcluded: Bool {
-        !calendars.isEmpty && wantedCalendars?.isEmpty == true
+        !calendars.isEmpty
+            && Set(calendars.map(\.id)).isSubset(of: excludedCalendars)
     }
 
     func isReading(_ calendar: CalendarSummary) -> Bool {
@@ -125,7 +123,11 @@ final class EntryLogModel {
     }
 
     var visible: [LoggedEntry] {
-        showsRoleFilter ? loaded.filter { roles.contains($0.role) } : loaded
+        loaded.filter { logged in
+            if showsRoleFilter, !roles.contains(logged.role) { return false }
+
+            return !excludedCalendars.contains(logged.entry.calendarId)
+        }
     }
 
     /// Which end of the range a nudge moves.
@@ -226,9 +228,7 @@ final class EntryLogModel {
 
         calendars = await reader.calendars()
 
-        let reading = await reader.log(
-            createdIn: range, timeZone: timeZone, limitedTo: wantedCalendars
-        )
+        let reading = await reader.log(createdIn: range, timeZone: timeZone)
 
         // A search the user has already moved on from should not
         // overwrite the one they are waiting for.
@@ -249,18 +249,13 @@ final class EntryLogModel {
 
         calendars = DemoLog.calendars
 
-        let wanted = wantedCalendars
-
         loaded = EntryLog.entries(
-            from: DemoLog.entries(timeZone: timeZone).filter { entry in
-                wanted.map { $0.contains(entry.calendarTitle) } ?? true
-            },
-            createdIn: range
+            from: DemoLog.entries(timeZone: timeZone), createdIn: range
         )
 
         searched = plan.span
         queries = plan.windows.count
-        calendarsSearched = wanted?.count ?? calendars.count
+        calendarsSearched = calendars.count
         state = .ready
     }
 }

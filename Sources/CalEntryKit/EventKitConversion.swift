@@ -26,6 +26,7 @@ extension CalendarEntry {
             location: event.location,
             notes: event.notes,
             url: event.url,
+            calendarId: event.calendar?.calendarIdentifier ?? "",
             calendarTitle: event.calendar?.title ?? "",
             calendarSource: event.calendar?.source?.title ?? "",
             // Missing rather than false would be the safer default,

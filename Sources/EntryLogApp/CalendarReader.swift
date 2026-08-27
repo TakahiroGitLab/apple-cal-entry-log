@@ -18,19 +18,10 @@ actor CalendarReader {
         try await EventKitSource.requestAccess()
     }
 
-    func log(
-        createdIn range: DayRange,
-        timeZone: TimeZone,
-        limitedTo calendars: Set<String>?
-    ) -> Reading {
+    func log(createdIn range: DayRange, timeZone: TimeZone) -> Reading {
 
-        let source = ready()
-
-        return source.log(
-            createdIn: range,
-            planner: .standard,
-            timeZone: timeZone,
-            limitedTo: calendars
+        ready().log(
+            createdIn: range, planner: .standard, timeZone: timeZone
         )
     }
 

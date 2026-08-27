@@ -81,6 +81,7 @@ public enum DemoLog {
                 creationDate: written(1, 8, 12),
                 startDate: happening(6, 18),
                 endDate: happening(6, 19),
+                calendarId: "Work",
                 calendarTitle: "Work",
                 calendarSource: "iCloud"
             ),
@@ -98,6 +99,7 @@ public enum DemoLog {
                 notes: "Bring the revised list. Parking is full after 07:30, "
                     + "so the side entrance is the one to use.",
                 url: URL(string: "message://%3Cdemo-invite%3E"),
+                calendarId: "Work",
                 calendarTitle: "Work",
                 calendarSource: "iCloud",
                 organizer: colleague,
@@ -117,6 +119,7 @@ public enum DemoLog {
                 location: "Sakura Convention Centre\n"
                     + "〒123-4567 桜県桜井市桜町 1-2-3\nJapan",
                 url: URL(string: "https://www.example.com/conference/2027"),
+                calendarId: "Work",
                 calendarTitle: "Work",
                 calendarSource: "iCloud"
             ),
@@ -129,6 +132,7 @@ public enum DemoLog {
                 creationDate: written(0, 9, 26),
                 startDate: happening(2, 16),
                 endDate: happening(2, 16, 15),
+                calendarId: "Work",
                 calendarTitle: "Work",
                 calendarSource: "iCloud"
             ),
@@ -144,6 +148,7 @@ public enum DemoLog {
                 location: "Outpatients, floor 2",
                 notes: "Chase the imaging report, and check whether the "
                     + "referral letter went out. Ask about the dressing.",
+                calendarId: "Work",
                 calendarTitle: "Work",
                 calendarSource: "iCloud"
             ),
@@ -164,6 +169,7 @@ public enum DemoLog {
                     Theatre list moved to Thursday — tell the ward.
                     Ask about the trainee's rota swap before Friday.
                     """,
+                calendarId: "Work",
                 calendarTitle: "Work",
                 calendarSource: "iCloud"
             ),
@@ -177,6 +183,7 @@ public enum DemoLog {
                 startDate: happening(11, 17, 30),
                 endDate: happening(11, 18, 15),
                 location: "Sakura Dental, 〒123-4567 桜県桜井市桜町 5-6",
+                calendarId: "Home",
                 calendarTitle: "Home",
                 calendarSource: "iCloud"
             )

@@ -76,6 +76,11 @@ public final class EventKitSource {
         in calendars: [EKCalendar]? = nil
     ) -> [CalendarEntry] {
 
+        // EventKit reads an empty array as no restriction and
+        // returns everything, which is the opposite of what asking
+        // for no calendars means.
+        if let calendars, calendars.isEmpty { return [] }
+
         let collected = Collector()
 
         for window in plan.windows {
@@ -152,20 +157,11 @@ public final class EventKitSource {
         roles: Set<EntryRole> = Set(EntryRole.allCases),
         planner: FetchPlanner = .standard,
         timeZone: TimeZone = .current,
-        in calendars: [EKCalendar]? = nil,
-        // Nil searches every writable calendar. A set searches only
-        // those, and an empty one searches nothing at all -- which is
-        // what every box unticked should do.
-        limitedTo wanted: Set<String>? = nil
+        in calendars: [EKCalendar]? = nil
     ) -> Reading {
 
         let plan = planner.plan(for: range, timeZone: timeZone)
-
-        let available = calendars ?? writableCalendars()
-
-        let searched = wanted.map { ids in
-            available.filter { ids.contains($0.calendarIdentifier) }
-        } ?? available
+        let searched = calendars ?? writableCalendars()
 
         return Reading(
             entries: EntryLog.entries(

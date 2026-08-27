@@ -90,6 +90,10 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
     public var notes: String?
     public var url: URL?
 
+    /// The store's identifier for the calendar this is on. Two
+    /// calendars can share a title, so the filter matches on this.
+    public var calendarId: String
+
     public var calendarTitle: String
 
     /// The account the calendar belongs to. Two calendars can share a
@@ -118,6 +122,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         location: String? = nil,
         notes: String? = nil,
         url: URL? = nil,
+        calendarId: String = "",
         calendarTitle: String = "",
         calendarSource: String = "",
         calendarIsWritable: Bool = true,
@@ -135,6 +140,7 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         self.location = location
         self.notes = notes
         self.url = url
+        self.calendarId = calendarId
         self.calendarTitle = calendarTitle
         self.calendarSource = calendarSource
         self.calendarIsWritable = calendarIsWritable

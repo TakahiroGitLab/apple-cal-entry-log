@@ -89,7 +89,7 @@ look for the same name under System Settings > Privacy & Security.
 swift run core-tests
 ```
 
-147 checks, no dependencies, and no Xcode -- neither XCTest nor
+156 checks, no dependencies, and no Xcode -- neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about a hundred lines and prints
@@ -126,13 +126,16 @@ be neither written by you nor an invitation to you, since an invitation
 has to land somewhere it can be accepted, so skipping holidays and
 birthdays loses nothing and saves the reading.
 
-Of those, only the ticked ones. The filter sits above the listing with
-All and None beside it, and unticking a calendar keeps it out of the
-*search* rather than out of the results -- a calendar you did not want
-to see is a calendar there was no reason to open. The choice is
-remembered between launches and kept as the exclusions, so a calendar
-added next month arrives switched on. It appears only where there is
-more than one calendar to choose between.
+Of those, the ticked ones are shown. The filter sits above the listing
+with All and None beside it, and it filters what has already been read
+rather than what gets read, so ticking a box is instant. Keeping a
+calendar out of the search saves about forty milliseconds out of two
+hundred -- not worth making every tick wait for a fresh read.
+
+The choice is remembered between launches and kept as the exclusions,
+so a calendar added next month arrives switched on rather than
+silently missing. The filter appears only where there is more than one
+calendar to choose between.
 
 **The invited role, with nothing shared.** On the account this was
 built against nothing is shared, so nothing is an invitation, and the

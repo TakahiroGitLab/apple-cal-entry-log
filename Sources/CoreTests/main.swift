@@ -15,5 +15,6 @@ linkLabelTests(harness)
 dayRangeFromDatesTests(harness)
 pinpointTests(harness)
 roomLabelTests(harness)
+calendarFilterTests(harness)
 
 exit(harness.report())
