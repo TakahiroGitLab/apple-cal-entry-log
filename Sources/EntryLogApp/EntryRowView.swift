@@ -10,7 +10,20 @@ struct EntryRowView: View {
     let timeZone: TimeZone
     let scale: TextScale
 
+    @State private var showingNote = false
+
     private var entry: CalendarEntry { logged.entry }
+
+    /// The note as written, when there is more of it than the line
+    /// showed.
+    private var fullNote: String? {
+        guard let notes = entry.notes?.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        ), !notes.isEmpty, notes != entry.noteSummary
+        else { return nil }
+
+        return notes
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -33,10 +46,13 @@ struct EntryRowView: View {
                         .background(.tint.opacity(0.15), in: Capsule())
                 }
 
+                // Lighter than the details below it. The stamp is
+                // what the list is sorted by and hardly ever what is
+                // being read; it wants to be findable, not loud.
                 Text(formatting.stamp(logged.creationDate))
                     .font(scale.font(11))
                     .monospacedDigit()
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.tertiary)
                     .fixedSize()
             }
 
@@ -63,10 +79,16 @@ struct EntryRowView: View {
             }
 
             if let note = entry.noteSummary {
-                // The whole note on hover: the line only has room for
-                // the opening of it.
-                detail(note, icon: "text.alignleft")
-                    .help(entry.notes ?? note)
+                // The whole note on hover. The line has room for the
+                // opening of it and no more, and a note is the one
+                // field where the part that matters is as likely to be
+                // at the end.
+                detail(showingNote ? (fullNote ?? note) : note,
+                       icon: "text.alignleft")
+                    .lineLimit(showingNote ? nil : 1)
+                    .onHover { hovering in
+                        showingNote = hovering && fullNote != nil
+                    }
             }
 
             if let url = entry.url, let label = LinkLabel.describe(url) {
@@ -91,7 +113,10 @@ struct EntryRowView: View {
     private func detail(_ text: String, icon: String) -> some View {
         Label(text, systemImage: icon)
             .font(scale.font(12))
-            .foregroundStyle(.secondary)
+            // Darker than plain secondary. These lines are the ones
+            // being read, and losing them into the background to make
+            // the stamp recede would be the wrong trade.
+            .foregroundStyle(.primary.opacity(0.78))
             .textSelection(.enabled)
     }
 

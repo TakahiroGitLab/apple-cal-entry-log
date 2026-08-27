@@ -169,7 +169,9 @@ merely containing the word, like Japan Post, keeps its name.
 
 Notes are flattened to one line and cut to 50 characters, by character
 rather than by byte, so Japanese is neither mangled nor cut three
-characters in. The window shows the whole note on hover.
+characters in. Hovering the line opens the note in full -- a note is
+the one field where the part that matters is as likely to be at the
+end.
 
 Links are named, not spelled out. An entry written from an invitation
 carries a `message:` URL back to the mail it came from, which in full
@@ -180,6 +182,11 @@ clickable, terminals that do not -- Terminal.app among them -- print
 the label plain, and a redirected run stays plain text.
 
 A row with nothing to say on a line does not print that line.
+
+Three weights, not two. The title is plain, the details a shade under
+it, and the creation stamp lighter again: it is what the list is
+sorted by and hardly ever what is being read, so it wants to be
+findable rather than loud.
 
 ## What EventKit would not do
 
