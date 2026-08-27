@@ -26,6 +26,13 @@ mkdir -p "${CONTENTS}/MacOS" "${CONTENTS}/Resources"
 
 cp "${ROOT}/.build/${CONFIGURATION}/${PRODUCT}" "${CONTENTS}/MacOS/${PRODUCT}"
 
+# The icon is drawn rather than stored: Scripts/make-icon.swift writes
+# every size the iconset wants, and iconutil packs them.
+swift "${ROOT}/Scripts/make-icon.swift" "${ROOT}/build/AppIcon.iconset"
+iconutil --convert icns \
+    --output "${CONTENTS}/Resources/AppIcon.icns" \
+    "${ROOT}/build/AppIcon.iconset"
+
 cat > "${CONTENTS}/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -45,6 +52,8 @@ cat > "${CONTENTS}/Info.plist" <<PLIST
   <string>public.app-category.productivity</string>
   <key>NSPrincipalClass</key>              <string>NSApplication</string>
   <key>NSHighResolutionCapable</key>       <true/>
+  <key>CFBundleIconFile</key>              <string>AppIcon</string>
+  <key>CFBundleIconName</key>              <string>AppIcon</string>
 
   <key>NSAppleEventsUsageDescription</key>
   <string>Entry Log asks Calendar to open the day an entry falls on, so that you can see it in context. It sends no other commands.</string>

@@ -52,9 +52,12 @@ struct EntryRowView: View {
                 if showsRole {
                     Text(logged.role.rawValue)
                         .font(scale.font(10))
+                        .foregroundStyle(colour(of: logged.role))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(.tint.opacity(0.15), in: Capsule())
+                        .background(
+                            colour(of: logged.role).opacity(0.15), in: Capsule()
+                        )
                 }
 
                 // Lighter than the details below it. The stamp is
@@ -139,6 +142,18 @@ struct EntryRowView: View {
             // the stamp recede would be the wrong trade.
             .foregroundStyle(.primary.opacity(0.78))
             .modifier(Selectable(enabled: selectable))
+    }
+
+    /// One colour per role, since the badge exists to tell them apart
+    /// and two capsules in the same colour do not.
+    ///
+    /// Blue for what you wrote, orange for what arrived from somebody
+    /// else: a warm colour for the entries that came from outside.
+    private func colour(of role: EntryRole) -> Color {
+        switch role {
+        case .created: .blue
+        case .invited: .orange
+        }
     }
 
     private func showInCalendar() {

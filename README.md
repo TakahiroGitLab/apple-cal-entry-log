@@ -16,7 +16,13 @@ calendars.
 ```
 
 No Xcode: SwiftPM builds the binary against the Command Line Tools SDK
-and the script assembles the bundle around it, ad-hoc signed.
+and the script assembles the bundle around it, ad-hoc signed. The icon
+is drawn by `Scripts/make-icon.swift` at build time -- every dimension
+in it is a fraction of the canvas, so one drawing serves all ten sizes
+and a colour change is one number rather than ten files. Under 96
+pixels it pares itself back: at that size the rings, the rule and
+eight days become four smudges, and a smudge is worse than an
+absence.
 
 Use `install.sh` once a copy lives in `/Applications`. Building into
 `build/` alone leaves that copy stale, and running yesterday's app
