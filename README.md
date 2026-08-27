@@ -169,9 +169,16 @@ merely containing the word, like Japan Post, keeps its name.
 
 Notes are flattened to one line and cut to 50 characters, by character
 rather than by byte, so Japanese is neither mangled nor cut three
-characters in. Hovering the line opens the note in full -- a note is
-the one field where the part that matters is as likely to be at the
-end.
+characters in. Hovering the line opens the note in full, as one
+paragraph and at most eight lines -- a note is the one field where the
+part that matters is as likely to be at the end, and a note of twenty
+short lines opening into twenty would throw the rest of the list off
+the screen.
+
+That line is the one detail the window will not let you select. Text
+you can select is drawn by a text view of its own, and swapping the
+string under one while the row is also changing height took the window
+down.
 
 Links are named, not spelled out. An entry written from an invitation
 carries a `message:` URL back to the mail it came from, which in full

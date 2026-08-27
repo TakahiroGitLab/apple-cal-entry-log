@@ -14,15 +14,26 @@ struct EntryRowView: View {
 
     private var entry: CalendarEntry { logged.entry }
 
-    /// The note as written, when there is more of it than the line
-    /// showed.
+    /// The whole note as one paragraph, when there is more of it than
+    /// the line showed.
+    ///
+    /// Flattened rather than shown as written: a note of twenty short
+    /// lines would otherwise open into twenty, throwing the rest of
+    /// the list off the screen. The breaks carry no meaning worth that.
     private var fullNote: String? {
-        guard let notes = entry.notes?.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        ), !notes.isEmpty, notes != entry.noteSummary
-        else { return nil }
+        guard let notes = entry.notes else { return nil }
 
-        return notes
+        let flattened = notes
+            .split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "  ")
+
+        guard !flattened.isEmpty, flattened != entry.noteSummary else {
+            return nil
+        }
+
+        return flattened
     }
 
     var body: some View {
@@ -84,8 +95,11 @@ struct EntryRowView: View {
                 // field where the part that matters is as likely to be
                 // at the end.
                 detail(showingNote ? (fullNote ?? note) : note,
-                       icon: "text.alignleft")
-                    .lineLimit(showingNote ? nil : 1)
+                       icon: "text.alignleft",
+                       selectable: false)
+                    // Bounded: an opened note should not push the rows
+                    // under it off the window.
+                    .lineLimit(showingNote ? 8 : 1)
                     .onHover { hovering in
                         showingNote = hovering && fullNote != nil
                     }
@@ -110,17 +124,40 @@ struct EntryRowView: View {
         .help("Double-click to show the day in Calendar")
     }
 
-    private func detail(_ text: String, icon: String) -> some View {
+    /// One detail line.
+    ///
+    /// `selectable` is off for the note. Selectable text is drawn by a
+    /// text view of its own, and swapping the string under one while
+    /// the row is also changing height took the window down.
+    private func detail(
+        _ text: String, icon: String, selectable: Bool = true
+    ) -> some View {
         Label(text, systemImage: icon)
             .font(scale.font(12))
             // Darker than plain secondary. These lines are the ones
             // being read, and losing them into the background to make
             // the stamp recede would be the wrong trade.
             .foregroundStyle(.primary.opacity(0.78))
-            .textSelection(.enabled)
+            .modifier(Selectable(enabled: selectable))
     }
 
     private func showInCalendar() {
         CalendarNavigator.show(entry, timeZone: timeZone)
+    }
+}
+
+
+/// `.textSelection` takes two different types for on and off, so a
+/// ternary between them will not compile.
+private struct Selectable: ViewModifier {
+
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.textSelection(.enabled)
+        } else {
+            content.textSelection(.disabled)
+        }
     }
 }

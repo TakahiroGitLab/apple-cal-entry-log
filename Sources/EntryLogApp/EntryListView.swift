@@ -51,13 +51,9 @@ struct EntryListView: View {
 
                 dayField(.end, selection: $model.endDay)
 
-                Spacer()
-
-                textSizeControls
-
-                // The list keeps itself up to date, so this is only
-                // ever a retry. An icon is as much room as that
-                // deserves.
+                // Beside the dates, because it acts on them. The
+                // list keeps itself up to date, so this is only ever a
+                // retry, and an icon is as much room as that deserves.
                 Button {
                     Task { await model.reload() }
                 } label: {
@@ -66,6 +62,10 @@ struct EntryListView: View {
                 .keyboardShortcut("r")
                 .help("Read again (⌘R)")
                 .disabled(model.state == .loading)
+
+                Spacer()
+
+                textSizeControls
             }
 
             HStack(spacing: 8) {
@@ -111,6 +111,10 @@ struct EntryListView: View {
         }
     }
 
+    /// Only for the two date fields: `2026/08/27`, whatever the Mac's
+    /// region says. Nothing else in the window is localised by it.
+    private static let dateFieldLocale = Locale(identifier: "ja_JP")
+
     /// A date field with its own pair of arrows.
     ///
     /// The stepper is separate from the field on purpose. The stock
@@ -126,6 +130,11 @@ struct EntryListView: View {
             DatePicker("", selection: selection, displayedComponents: .date)
                 .labelsHidden()
                 .datePickerStyle(.field)
+                // Year first, to match the stamps in the listing and
+                // the order the days are asked for on the command
+                // line. The field otherwise follows the Mac's region,
+                // which puts the month first here.
+                .environment(\.locale, Self.dateFieldLocale)
 
             Stepper(
                 "",

@@ -140,6 +140,26 @@ public enum DemoLog {
                 calendarSource: "iCloud"
             ),
 
+            // A note of several lines. This is the shape that used
+            // to take the window down when it opened on hover, so it
+            // is worth having one to hover over.
+            CalendarEntry(
+                id: "demo-7",
+                externalId: "demo-7",
+                title: "Handover",
+                creationDate: written(0, 12, 5),
+                startDate: happening(1, 8, 30),
+                endDate: happening(1, 9),
+                notes: """
+                    Bed 4 discharge letter still unsigned.
+                    Bed 9 waiting on the second sample; chase at 09:00.
+                    Theatre list moved to Thursday — tell the ward.
+                    Ask about the trainee's rota swap before Friday.
+                    """,
+                calendarTitle: "Work",
+                calendarSource: "iCloud"
+            ),
+
             // Not work, so the listing is not all one colour.
             CalendarEntry(
                 id: "demo-6",
