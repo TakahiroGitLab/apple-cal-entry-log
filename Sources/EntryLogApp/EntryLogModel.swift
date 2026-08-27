@@ -156,6 +156,11 @@ final class EntryLogModel {
 
         state = .loading
 
+        if Launch.isDemo {
+            showDemo(in: range)
+            return
+        }
+
         do {
             try await reader.requestAccess()
         } catch {
@@ -173,6 +178,22 @@ final class EntryLogModel {
         searched = reading.plan.span
         queries = reading.plan.windows.count
         calendarsSearched = reading.calendarsSearched
+        state = .ready
+    }
+
+    /// The invented calendar, filtered by the same rules as a real
+    /// one, so that the presets and the role boxes behave.
+    private func showDemo(in range: DayRange) {
+
+        let plan = FetchPlanner.standard.plan(for: range, timeZone: timeZone)
+
+        loaded = EntryLog.entries(
+            from: DemoLog.entries(timeZone: timeZone), createdIn: range
+        )
+
+        searched = plan.span
+        queries = plan.windows.count
+        calendarsSearched = 2
         state = .ready
     }
 }

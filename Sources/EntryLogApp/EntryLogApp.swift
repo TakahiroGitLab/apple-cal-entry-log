@@ -4,7 +4,7 @@ import SwiftUI
 struct EntryLogApp: App {
 
     var body: some Scene {
-        WindowGroup("Entry Log") {
+        WindowGroup(Launch.windowTitle) {
             EntryListView()
                 .frame(minWidth: 460, minHeight: 420)
         }

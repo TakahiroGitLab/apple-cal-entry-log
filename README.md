@@ -42,6 +42,18 @@ swift run entry-log --created             # only what I wrote
 swift run entry-log --diagnose            # what EventKit can see
 ```
 
+The window also takes `--demo`, which fills it with an invented
+calendar and never opens the store:
+
+```
+open -a /Applications/EntryLog.app --args --demo
+```
+
+For screenshots. A listing of a real calendar carries names,
+addresses, and whatever the notes happen to hold, so every screenshot
+of the working tool is unpublishable. It is also the only way to see
+the window on a Mac that has not granted access.
+
 `--diagnose` is worth running first on any new account. It lists the
 calendars EventKit can reach and counts how many entries carry a
 `creationDate` at all -- see below for why that is the question the
