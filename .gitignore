@@ -3,3 +3,6 @@
 *.xcodeproj
 .DS_Store
 build/
+
+# A drop box for screenshots and notes handed over by hand.
+to_claude_from_me/

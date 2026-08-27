@@ -46,22 +46,15 @@ struct EntryListView: View {
     }
 
 
-    /// The window's own controls: the days being asked about, and
-    /// the two commands that act on the whole listing.
+    /// Only what acts on the whole window. A toolbar row is one
+    /// control tall, and a date field with a stepper beside it is
+    /// not: the first attempt at this put the arrows through the top
+    /// and bottom of the title bar.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
 
-        ToolbarItemGroup(placement: .navigation) {
+        ToolbarItemGroup(placement: .primaryAction) {
 
-            dayField(.start, selection: $model.startDay)
-
-            Text("to")
-                .foregroundStyle(.secondary)
-
-            dayField(.end, selection: $model.endDay)
-
-            // Beside the dates, because it acts on them. The list
-            // keeps itself up to date, so this is only ever a retry.
             Button {
                 Task { await model.reload() }
             } label: {
@@ -70,9 +63,6 @@ struct EntryListView: View {
             .keyboardShortcut("r")
             .help("Read again (⌘R)")
             .disabled(model.state == .loading)
-        }
-
-        ToolbarItemGroup(placement: .primaryAction) {
 
             Button {
                 model.resize(by: -1)
@@ -92,43 +82,65 @@ struct EntryListView: View {
         }
     }
 
-    /// The bar between the toolbar and the listing: what is being
-    /// shown, as opposed to what is being asked for.
+    /// Two rows that never trade places.
+    ///
+    /// What is being asked for on top, what is being shown underneath.
+    /// Each group is anchored to an edge, because the role boxes come
+    /// and go with the data and everything sharing a row with them
+    /// used to slide as they did.
     private var filters: some View {
-        WrapLayout(spacing: 8, lineSpacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
 
-            preset("Yesterday", daysAgo: 1)
-            preset("Today", daysAgo: 0)
+            HStack(spacing: 8) {
+                dayField(.start, selection: $model.startDay)
 
-            if model.showsRoleFilter {
-                ForEach(EntryRole.allCases, id: \.self) { role in
-                    Toggle(role.rawValue, isOn: binding(for: role))
-                        .toggleStyle(.button)
-                        .buttonStyle(.glass)
-                }
+                Text("to")
+                    .foregroundStyle(.secondary)
+
+                dayField(.end, selection: $model.endDay)
+
+                Spacer(minLength: 12)
+
+                // Commands, not state: they set the range and then
+                // have nothing to say about it. Bordered, so they do
+                // not read as another pair of switches.
+                preset("Yesterday", daysAgo: 1)
+                preset("Today", daysAgo: 0)
             }
 
-            if model.showsCalendarFilter { calendarFilter }
+            if model.showsCalendarFilter || model.showsRoleFilter {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+
+                    if model.showsCalendarFilter { calendarFilter }
+
+                    Spacer(minLength: 16)
+
+                    if model.showsRoleFilter {
+                        ForEach(EntryRole.allCases, id: \.self) { role in
+                            Toggle(role.rawValue, isOn: binding(for: role))
+                                .toggleStyle(.checkbox)
+                        }
+                    }
+                }
+            }
         }
-        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
         .padding(.vertical, 8)
     }
 
-    /// Which calendars to read, pinned above the listing.
-    ///
-    /// Unticking one keeps it out of the search rather than out of the
-    /// results: a calendar the reader does not want to see is a
-    /// calendar there is no reason to open.
     @ViewBuilder
     private var calendarFilter: some View {
+
+        Text("Calendars")
+            .foregroundStyle(.secondary)
 
         ForEach(model.calendars) { calendar in
             Toggle(calendar.title, isOn: Binding(
                 get: { model.isReading(calendar) },
                 set: { model.setReading(calendar, $0) }
             ))
-            .toggleStyle(.button)
-            .buttonStyle(.glass)
+            .toggleStyle(.checkbox)
             .help(calendar.label)
         }
 
@@ -208,13 +220,9 @@ struct EntryListView: View {
     private func preset(_ title: String, daysAgo: Int) -> some View {
         let showing = model.isShowing(daysAgo: daysAgo)
 
-        if showing {
-            Button(title) { model.show(daysAgo: daysAgo) }
-                .buttonStyle(.glassProminent)
-        } else {
-            Button(title) { model.show(daysAgo: daysAgo) }
-                .buttonStyle(.glass)
-        }
+        Button(title) { model.show(daysAgo: daysAgo) }
+            .buttonStyle(.bordered)
+            .tint(showing ? .accentColor : nil)
     }
 
     private func binding(for role: EntryRole) -> Binding<Bool> {
