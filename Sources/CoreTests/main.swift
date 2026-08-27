@@ -14,5 +14,6 @@ locationLabelTests(harness)
 linkLabelTests(harness)
 dayRangeFromDatesTests(harness)
 pinpointTests(harness)
+roomLabelTests(harness)
 
 exit(harness.report())

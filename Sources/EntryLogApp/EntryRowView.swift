@@ -8,29 +8,37 @@ struct EntryRowView: View {
     let formatting: Formatting
     let showsRole: Bool
     let timeZone: TimeZone
+    let scale: TextScale
 
     private var entry: CalendarEntry { logged.entry }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
 
-            HStack(spacing: 8) {
-                Text(formatting.stamp(logged.creationDate))
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
+            // The title reads first and the stamp sits out of its way,
+            // in the corner, where a date is looked for rather than
+            // read through.
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+
+                Text(entry.displayTitle)
+                    .font(scale.font(13, weight: .semibold))
+
+                Spacer(minLength: 12)
 
                 if showsRole {
                     Text(logged.role.rawValue)
-                        .font(.caption2)
+                        .font(scale.font(10))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(.tint.opacity(0.15), in: Capsule())
                 }
-            }
 
-            Text(entry.displayTitle)
-                .font(.headline)
+                Text(formatting.stamp(logged.creationDate))
+                    .font(scale.font(11))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                    .fixedSize()
+            }
 
             if let when = formatting.when(entry) {
                 detail(when, icon: "clock")
@@ -66,7 +74,7 @@ struct EntryRowView: View {
                     NSWorkspace.shared.open(url)
                 } label: {
                     Label(label, systemImage: "link")
-                        .font(.caption)
+                        .font(scale.font(11))
                 }
                 .buttonStyle(.link)
             }
@@ -82,7 +90,7 @@ struct EntryRowView: View {
 
     private func detail(_ text: String, icon: String) -> some View {
         Label(text, systemImage: icon)
-            .font(.callout)
+            .font(scale.font(12))
             .foregroundStyle(.secondary)
             .textSelection(.enabled)
     }

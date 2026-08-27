@@ -33,6 +33,20 @@ final class EntryLogModel {
 
     let timeZone = TimeZone.current
 
+    /// Remembered between launches: a size chosen once for this screen
+    /// should not have to be chosen again tomorrow.
+    var textScale: TextScale = .remembered() {
+        didSet { textScale.remember() }
+    }
+
+    func resize(by direction: Int) {
+        textScale = textScale.stepped(by: direction)
+    }
+
+    func resetTextSize() {
+        textScale = .standard
+    }
+
     private let reader = CalendarReader()
     private var pending: Task<Void, Never>?
 

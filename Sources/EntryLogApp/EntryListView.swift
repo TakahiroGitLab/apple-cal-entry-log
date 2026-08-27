@@ -53,6 +53,8 @@ struct EntryListView: View {
 
                 Spacer()
 
+                textSizeControls
+
                 // The list keeps itself up to date, so this is only
                 // ever a retry. An icon is as much room as that
                 // deserves.
@@ -83,6 +85,45 @@ struct EntryListView: View {
             }
         }
         .padding(12)
+    }
+
+    /// Two buttons and a hidden third.
+    ///
+    /// ⌘= as well as ⌘+, because the key is the same one and reaching
+    /// the plus printed on it means holding shift. Every other Mac
+    /// application accepts both; a reader who has to look at the
+    /// keyboard has already been let down.
+    private var textSizeControls: some View {
+        HStack(spacing: 2) {
+
+            Button {
+                model.resize(by: -1)
+            } label: {
+                Image(systemName: "textformat.size.smaller")
+            }
+            .keyboardShortcut("-")
+            .help("Smaller text (⌘-)")
+            .disabled(!model.textScale.canShrink)
+
+            Button {
+                model.resize(by: 1)
+            } label: {
+                Image(systemName: "textformat.size.larger")
+            }
+            .keyboardShortcut("+")
+            .help("Larger text (⌘+)")
+            .disabled(!model.textScale.canGrow)
+
+            Button("") { model.resize(by: 1) }
+                .keyboardShortcut("=")
+                .hidden()
+                .frame(width: 0)
+
+            Button("") { model.resetTextSize() }
+                .keyboardShortcut("0")
+                .hidden()
+                .frame(width: 0)
+        }
     }
 
     /// A date field with its own pair of arrows.
@@ -173,7 +214,8 @@ struct EntryListView: View {
                     logged: logged,
                     formatting: formatting,
                     showsRole: model.showsRoleFilter,
-                    timeZone: model.timeZone
+                    timeZone: model.timeZone,
+                    scale: model.textScale
                 )
             }
             .listStyle(.inset)
