@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "AppleCalEntryLog",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS("26.0")],
     products: [
         .library(name: "CalEntryCore", targets: ["CalEntryCore"]),
         .library(name: "CalEntryKit", targets: ["CalEntryKit"]),

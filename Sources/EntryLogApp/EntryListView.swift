@@ -12,81 +12,106 @@ struct EntryListView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            controls
-            Divider()
-            content
-            Divider()
-            footer
-        }
-        .task(id: model.fetchKey) {
-            // A date picker can report several changes as it is being
-            // used. Waiting a moment means one search, not four.
-            try? await Task.sleep(for: .milliseconds(250))
+        content
+            // The chrome the system draws, rather than a strip of
+            // buttons pretending to be it: glass, the scroll-edge
+            // treatment, and whatever the next release does to
+            // toolbars all arrive without being asked for.
+            .toolbar { toolbar }
+            // The filters stay on screen -- knowing at a glance which
+            // calendars are being read is the whole point of them --
+            // but as a bar the scroll runs under, not a block of the
+            // window nailed above it.
+            .safeAreaBar(edge: .top) { filters }
+            .safeAreaBar(edge: .bottom) { footer }
+            .task(id: model.fetchKey) {
+                // A date picker can report several changes as it is
+                // being used. Waiting a moment means one search, not
+                // four.
+                try? await Task.sleep(for: .milliseconds(250))
 
-            guard !Task.isCancelled else { return }
+                guard !Task.isCancelled else { return }
 
-            await model.reload()
-        }
-        .task {
-            // An entry added in Calendar, or arriving from the phone,
-            // should appear here without being asked for.
-            for await _ in NotificationCenter.default.notifications(
-                named: EventKitSource.storeChanged
-            ) {
-                model.reloadSoon()
+                await model.reload()
             }
-        }
+            .task {
+                // An entry added in Calendar, or arriving from the
+                // phone, should appear here without being asked for.
+                for await _ in NotificationCenter.default.notifications(
+                    named: EventKitSource.storeChanged
+                ) {
+                    model.reloadSoon()
+                }
+            }
     }
 
 
-    private var controls: some View {
-        VStack(alignment: .leading, spacing: 10) {
+    /// The window's own controls: the days being asked about, and
+    /// the two commands that act on the whole listing.
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
 
-            HStack(spacing: 8) {
-                dayField(.start, selection: $model.startDay)
+        ToolbarItemGroup(placement: .navigation) {
 
-                Text("to")
-                    .foregroundStyle(.secondary)
+            dayField(.start, selection: $model.startDay)
 
-                dayField(.end, selection: $model.endDay)
+            Text("to")
+                .foregroundStyle(.secondary)
 
-                // Beside the dates, because it acts on them. The
-                // list keeps itself up to date, so this is only ever a
-                // retry, and an icon is as much room as that deserves.
-                Button {
-                    Task { await model.reload() }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .keyboardShortcut("r")
-                .help("Read again (⌘R)")
-                .disabled(model.state == .loading)
+            dayField(.end, selection: $model.endDay)
 
-                Spacer()
-
-                textSizeControls
+            // Beside the dates, because it acts on them. The list
+            // keeps itself up to date, so this is only ever a retry.
+            Button {
+                Task { await model.reload() }
+            } label: {
+                Image(systemName: "arrow.clockwise")
             }
+            .keyboardShortcut("r")
+            .help("Read again (⌘R)")
+            .disabled(model.state == .loading)
+        }
 
-            HStack(spacing: 8) {
-                preset("Yesterday", daysAgo: 1)
-                preset("Today", daysAgo: 0)
+        ToolbarItemGroup(placement: .primaryAction) {
 
-                if model.showsRoleFilter {
-                    Divider().frame(height: 16)
+            Button {
+                model.resize(by: -1)
+            } label: {
+                Image(systemName: "textformat.size.smaller")
+            }
+            .help("Smaller text (⌘-)")
+            .disabled(!model.textScale.canShrink)
 
-                    ForEach(EntryRole.allCases, id: \.self) { role in
-                        Toggle(role.rawValue, isOn: binding(for: role))
-                            .toggleStyle(.checkbox)
-                    }
+            Button {
+                model.resize(by: 1)
+            } label: {
+                Image(systemName: "textformat.size.larger")
+            }
+            .help("Larger text (⌘+)")
+            .disabled(!model.textScale.canGrow)
+        }
+    }
+
+    /// The bar between the toolbar and the listing: what is being
+    /// shown, as opposed to what is being asked for.
+    private var filters: some View {
+        WrapLayout(spacing: 8, lineSpacing: 6) {
+
+            preset("Yesterday", daysAgo: 1)
+            preset("Today", daysAgo: 0)
+
+            if model.showsRoleFilter {
+                ForEach(EntryRole.allCases, id: \.self) { role in
+                    Toggle(role.rawValue, isOn: binding(for: role))
+                        .toggleStyle(.button)
+                        .buttonStyle(.glass)
                 }
-
-                Spacer()
             }
 
             if model.showsCalendarFilter { calendarFilter }
         }
-        .padding(12)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 
     /// Which calendars to read, pinned above the listing.
@@ -94,33 +119,31 @@ struct EntryListView: View {
     /// Unticking one keeps it out of the search rather than out of the
     /// results: a calendar the reader does not want to see is a
     /// calendar there is no reason to open.
+    @ViewBuilder
     private var calendarFilter: some View {
-        VStack(alignment: .leading, spacing: 6) {
 
-            Divider()
-
-            WrapLayout {
-                Text("Calendars")
-                    .foregroundStyle(.secondary)
-
-                ForEach(model.calendars) { calendar in
-                    Toggle(calendar.title, isOn: Binding(
-                        get: { model.isReading(calendar) },
-                        set: { model.setReading(calendar, $0) }
-                    ))
-                    .toggleStyle(.checkbox)
-                    .help(calendar.label)
-                }
-
-                Button("All") { model.readEveryCalendar() }
-                    .buttonStyle(.link)
-                    .disabled(model.excludedCalendars.isEmpty)
-
-                Button("None") { model.readNoCalendar() }
-                    .buttonStyle(.link)
-                    .disabled(model.everyCalendarIsExcluded)
-            }
+        ForEach(model.calendars) { calendar in
+            Toggle(calendar.title, isOn: Binding(
+                get: { model.isReading(calendar) },
+                set: { model.setReading(calendar, $0) }
+            ))
+            .toggleStyle(.button)
+            .buttonStyle(.glass)
+            .help(calendar.label)
         }
+
+        Menu {
+            Button("All Calendars") { model.readEveryCalendar() }
+                .disabled(model.excludedCalendars.isEmpty)
+
+            Button("No Calendars") { model.readNoCalendar() }
+                .disabled(model.everyCalendarIsExcluded)
+        } label: {
+            Image(systemName: "line.3.horizontal.decrease")
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .help("Show every calendar, or none")
     }
 
     /// The same two commands the View menu carries, where the eye
@@ -181,12 +204,17 @@ struct EntryListView: View {
         }
     }
 
+    @ViewBuilder
     private func preset(_ title: String, daysAgo: Int) -> some View {
-        Button(title) {
-            model.show(daysAgo: daysAgo)
+        let showing = model.isShowing(daysAgo: daysAgo)
+
+        if showing {
+            Button(title) { model.show(daysAgo: daysAgo) }
+                .buttonStyle(.glassProminent)
+        } else {
+            Button(title) { model.show(daysAgo: daysAgo) }
+                .buttonStyle(.glass)
         }
-        .buttonStyle(.bordered)
-        .tint(model.isShowing(daysAgo: daysAgo) ? .accentColor : nil)
     }
 
     private func binding(for role: EntryRole) -> Binding<Bool> {
@@ -249,6 +277,10 @@ struct EntryListView: View {
                 )
             }
             .listStyle(.inset)
+            // The rows should pass under the bars rather than stop at
+            // them, which is the whole reason the bars are glass.
+            .scrollEdgeEffectStyle(.soft, for: .all)
+            .scrollContentBackground(.hidden)
         }
     }
 
