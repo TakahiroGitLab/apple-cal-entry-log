@@ -184,11 +184,12 @@ public struct CalendarEntry: Sendable, Equatable, Identifiable {
         return title
     }
 
-    /// Rooms and equipment, listed apart from the human guests. A
-    /// nameless one falls back to its address, which for a Google
-    /// resource calendar is mostly a generated identifier.
+    /// Rooms and equipment, listed apart from the human guests.
+    ///
+    /// A room with nothing but a generated address to its name is left
+    /// out entirely -- see `RoomLabel`.
     public var rooms: [String] {
-        attendees.filter(\.isResource).map { RoomLabel.tidy($0.label) }
+        attendees.filter(\.isResource).compactMap(RoomLabel.from)
     }
 
     /// Human guests, minus the user, whose own presence on the list

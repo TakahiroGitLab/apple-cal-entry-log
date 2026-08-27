@@ -1,36 +1,35 @@
 import Foundation
 
-/// What to call a meeting room that has no name.
+/// What to call a meeting room, when there is anything worth calling
+/// it.
 ///
 /// A room booked through Google Workspace arrives as a participant
-/// whose address is a resource calendar:
+/// with no name and an address like:
 ///
 ///     amupras.jp_2d32333033313938392d3436@resource.calendar.google.com
 ///
-/// Everything after the underscore is a generated identifier. Printing
-/// it costs a whole line and tells the reader nothing they can use --
-/// the room's actual name is usually on the entry's location line
-/// anyway. Only the domain in front of the underscore says anything.
+/// Everything after the underscore is a generated identifier, and the
+/// domain in front of it is already on the calendar line. The room's
+/// real name comes through as the entry's location, so the line costs
+/// a row of the listing and adds nothing to it. Such a room is left
+/// out.
 public enum RoomLabel {
 
     private static let resourceHost = "@resource.calendar.google.com"
 
-    /// The address shortened if it is a resource calendar, unchanged
-    /// if it is anything else.
-    public static func tidy(_ label: String) -> String {
+    /// The room's name, or nothing when it has none worth printing.
+    public static func from(_ participant: Participant) -> String? {
 
-        let lowered = label.lowercased()
+        if let name = participant.name, !name.isEmpty { return name }
 
-        guard lowered.hasSuffix(resourceHost) else { return label }
+        guard let email = participant.email, !email.isEmpty else { return nil }
 
-        let local = label.dropLast(resourceHost.count)
+        return isGenerated(email) ? nil : email
+    }
 
-        guard let underscore = local.firstIndex(of: "_") else {
-            return local.isEmpty ? label : String(local)
-        }
-
-        let domain = local[local.startIndex..<underscore]
-
-        return domain.isEmpty ? String(local) : String(domain)
+    /// A Google resource calendar address: a domain, an underscore, a
+    /// generated identifier.
+    private static func isGenerated(_ email: String) -> Bool {
+        email.lowercased().hasSuffix(resourceHost)
     }
 }

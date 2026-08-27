@@ -86,7 +86,7 @@ look for the same name under System Settings > Privacy & Security.
 swift run core-tests
 ```
 
-138 checks, no dependencies, and no Xcode -- neither XCTest nor
+147 checks, no dependencies, and no Xcode -- neither XCTest nor
 swift-testing ships with the Command Line Tools, and reaching Xcode's
 copy needs a licence agreement and `sudo`. The harness in
 `Sources/CoreTests/Harness.swift` is about a hundred lines and prints

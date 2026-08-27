@@ -51,7 +51,12 @@ public enum DemoLog {
 
         let registrar = Participant(name: "Kim Ono", email: "kim@example.com")
 
-        let room = Participant(
+        let room = Participant(name: "Seminar room 4", kind: .room)
+
+        // Booked through Google Workspace, so it has no name and an
+        // address that is mostly a generated identifier. It is not
+        // listed -- that is the point of it being here.
+        let namelessRoom = Participant(
             name: nil,
             email: "example.com_1a2b3c4d5e6f@resource.calendar.google.com",
             kind: .room
@@ -81,14 +86,14 @@ public enum DemoLog {
                 creationDate: written(0, 8, 3),
                 startDate: happening(9, 8),
                 endDate: happening(9, 12),
-                location: "Seminar room 4",
+                location: "Theatre admin, floor 3",
                 notes: "Bring the revised list. Parking is full after 07:30, "
                     + "so the side entrance is the one to use.",
                 url: URL(string: "message://%3Cdemo-invite%3E"),
                 calendarTitle: "Work",
                 calendarSource: "iCloud",
                 organizer: colleague,
-                attendees: [colleague, me, registrar, room]
+                attendees: [colleague, me, registrar, room, namelessRoom]
             ),
 
             // All day, and a location as Maps hands it over: name,
