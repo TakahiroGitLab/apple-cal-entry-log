@@ -22,21 +22,23 @@ let package = Package(
         // and the store query, no decisions.
         .target(name: "CalEntryKit", dependencies: ["CalEntryCore"]),
 
-        // Not a .testTarget: neither XCTest nor swift-testing ships
-        // with the Command Line Tools, and reaching Xcode's copy needs
-        // a licence agreement and sudo. A plain executable with a
-        // small harness runs on any Mac with swift installed.
-        //   swift run core-tests
+        // The SwiftUI window.
         .executableTarget(
             name: "EntryLogApp",
             dependencies: ["CalEntryCore", "CalEntryKit"]
         ),
 
+        // The same log, printed.
         .executableTarget(
             name: "EntryLogCLI",
             dependencies: ["CalEntryCore", "CalEntryKit"]
         ),
 
+        // Not a .testTarget: neither XCTest nor swift-testing ships
+        // with the Command Line Tools, and reaching Xcode's copy needs
+        // a licence agreement and sudo. A plain executable with a
+        // small harness runs on any Mac with swift installed.
+        //   swift run core-tests
         .executableTarget(name: "CoreTests", dependencies: ["CalEntryCore"])
     ]
 )

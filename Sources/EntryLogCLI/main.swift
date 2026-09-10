@@ -2,13 +2,14 @@ import Foundation
 import CalEntryCore
 import CalEntryKit
 
-// A thin way to run the thing from a terminal, ahead of any interface.
+// The same log as the window, printed.
 //
 //   swift run entry-log                       today
 //   swift run entry-log 2026-08-18            that day
 //   swift run entry-log 2026-08-18 2026-08-20 that range
 //   swift run entry-log --created             only what I wrote
 //   swift run entry-log --invited             only what I was asked to
+//   swift run entry-log --diagnose            what EventKit can see
 
 let arguments = Array(CommandLine.arguments.dropFirst())
 
