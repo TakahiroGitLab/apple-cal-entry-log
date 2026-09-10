@@ -306,10 +306,17 @@ struct EntryListView: View {
         .padding(.vertical, 8)
     }
 
+    /// "12 entries", or "3 of 12" when something is being held back.
+    ///
+    /// Either filter can hold rows back -- a role unticked, or a
+    /// calendar -- and both have to be counted. Asking whether the
+    /// role filter is on screen was the older question, from before
+    /// there was a calendar filter to ask about; it left a filtered
+    /// listing reading as a quiet week.
     private var count: String {
         let shown = model.visible.count
 
-        guard model.showsRoleFilter, shown != model.loaded.count else {
+        guard shown != model.loaded.count else {
             return shown == 1 ? "1 entry" : "\(shown) entries"
         }
 
