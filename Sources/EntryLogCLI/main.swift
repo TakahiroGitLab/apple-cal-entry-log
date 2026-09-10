@@ -129,14 +129,17 @@ func whenLine(_ entry: CalendarEntry) -> String? {
     return "\(stamp(start)) - \(finish)\(tail)"
 }
 
-let source = EventKitSource()
-
 do {
     try await EventKitSource.requestAccess()
 } catch {
     FileHandle.standardError.write(Data("\(error)\n".utf8))
     exit(1)
 }
+
+// Made after the grant, never before. A store that predates it goes
+// on reporting an empty calendar for the life of the process, which
+// on a first run makes every count below a zero.
+let source = EventKitSource()
 
 if flags.contains("--diagnose") {
 
