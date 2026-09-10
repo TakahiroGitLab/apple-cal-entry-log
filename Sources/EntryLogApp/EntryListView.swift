@@ -256,7 +256,7 @@ struct EntryListView: View {
     private var emptyReason: String {
 
         if model.everyCalendarIsExcluded {
-            return "No calendars are ticked, so nothing was read."
+            return "No calendars are ticked, so every entry is hidden."
         }
 
         switch model.calendarsSearched {
