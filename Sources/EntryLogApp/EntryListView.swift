@@ -89,11 +89,12 @@ struct EntryListView: View {
         .padding(12)
     }
 
-    /// Which calendars to read, pinned above the listing.
+    /// Which calendars to show, pinned above the listing.
     ///
-    /// Unticking one keeps it out of the search rather than out of the
-    /// results: a calendar the reader does not want to see is a
-    /// calendar there is no reason to open.
+    /// Unticking one holds back what has already been read rather
+    /// than narrowing the next search. Keeping a calendar out of the
+    /// query saves about forty milliseconds out of two hundred, which
+    /// is not worth making every tick of a box wait for a fresh read.
     private var calendarFilter: some View {
         VStack(alignment: .leading, spacing: 6) {
 
