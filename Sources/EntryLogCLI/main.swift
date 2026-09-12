@@ -2,13 +2,14 @@ import Foundation
 import CalEntryCore
 import CalEntryKit
 
-// A thin way to run the thing from a terminal, ahead of any interface.
+// The same log as the window, printed.
 //
 //   swift run entry-log                       today
 //   swift run entry-log 2026-08-18            that day
 //   swift run entry-log 2026-08-18 2026-08-20 that range
 //   swift run entry-log --created             only what I wrote
 //   swift run entry-log --invited             only what I was asked to
+//   swift run entry-log --diagnose            what EventKit can see
 
 let arguments = Array(CommandLine.arguments.dropFirst())
 
@@ -129,14 +130,17 @@ func whenLine(_ entry: CalendarEntry) -> String? {
     return "\(stamp(start)) - \(finish)\(tail)"
 }
 
-let source = EventKitSource()
-
 do {
     try await EventKitSource.requestAccess()
 } catch {
     FileHandle.standardError.write(Data("\(error)\n".utf8))
     exit(1)
 }
+
+// Made after the grant, never before. A store that predates it goes
+// on reporting an empty calendar for the life of the process, which
+// on a first run makes every count below a zero.
+let source = EventKitSource()
 
 if flags.contains("--diagnose") {
 

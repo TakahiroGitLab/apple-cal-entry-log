@@ -15,6 +15,12 @@ func fetchPlanTests(_ h: Harness) {
         ).month ?? .max
     }
 
+    func days(_ window: FetchWindow) -> Int {
+        calendar.dateComponents(
+            [.day], from: window.start, to: window.end
+        ).day ?? .max
+    }
+
     h.suite("Fetch plan") { h in
 
         h.test("The plan covers the days asked for") {
@@ -50,6 +56,28 @@ func fetchPlanTests(_ h: Harness) {
                 h.expect(
                     months(window) <= FetchPlanner.maximumWindowInMonths,
                     "window of \(months(window)) months is within the limit"
+                )
+            }
+        }
+
+        h.test("Nor does one reach four years counted in days") {
+            // The limit is documented in years and may be enforced
+            // in seconds, so months are the wrong unit to check it
+            // in. Every forty-eight month window spanning a leap day
+            // is 1461 days -- one over four times 365 -- which is
+            // not an edge case but the ordinary result. A predicate
+            // judged too long is truncated rather than refused, and
+            // the entries beyond the cut go missing silently.
+            let range = try Fixture.range("2016-01-01", "2016-01-01")
+
+            let plan = FetchPlanner.standard.plan(
+                for: range, timeZone: Fixture.tokyo
+            )
+
+            for window in plan.windows {
+                h.expect(
+                    days(window) <= 4 * 365,
+                    "window of \(days(window)) days is within four years"
                 )
             }
         }

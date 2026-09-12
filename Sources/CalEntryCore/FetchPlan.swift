@@ -48,9 +48,18 @@ public struct FetchPlan: Sendable, Equatable {
 /// that into queries EventKit will accept.
 public struct FetchPlanner: Sendable, Equatable {
 
-    /// EventKit refuses a single predicate spanning more than four
-    /// years.
-    public static let maximumWindowInMonths = 48
+    /// How far one query may reach. EventKit refuses a single
+    /// predicate spanning more than four years.
+    ///
+    /// Forty-seven rather than the forty-eight that limit allows.
+    /// "Four years" is documented in years but may well be enforced
+    /// in seconds, and forty-eight months across a leap day is 1461
+    /// of them -- one more than four times 365. An over-long
+    /// predicate is truncated rather than refused, so being wrong
+    /// here costs entries that go missing with nothing to say so,
+    /// which is the whole failure this planner exists to prevent. A
+    /// month of headroom buys at most one extra query.
+    public static let maximumWindowInMonths = 47
 
     public var yearsBefore: Int
     public var yearsAfter: Int

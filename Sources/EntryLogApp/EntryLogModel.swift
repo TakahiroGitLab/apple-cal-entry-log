@@ -74,6 +74,22 @@ final class EntryLogModel {
     private let reader = CalendarReader()
     private var pending: Task<Void, Never>?
 
+    /// Which read is the newest one. Taken on the way in, checked
+    /// again after every suspension.
+    ///
+    /// Three things ask for a read -- the range changing, the reload
+    /// button, and a change arriving from the store -- and nothing
+    /// stopped two of them being in flight together. `pending` only
+    /// ever serialised the notifications. Being on the main actor
+    /// makes each line safe but not each sequence: every `await` is
+    /// somewhere another read can run, so the slower one finished
+    /// last and wrote its answer over the newer one, and the window
+    /// fell back to a range the reader had already left.
+    ///
+    /// Cancellation does not cover it. A second read does not cancel
+    /// the first, so `Task.isCancelled` stays false in both.
+    private var generation = 0
+
     /// Changes only when the chosen *days* change, so picking a
     /// different time on the same day does not set off a search.
     var fetchKey: String {
@@ -201,6 +217,9 @@ final class EntryLogModel {
 
     func reload() async {
 
+        generation += 1
+        let mine = generation
+
         let range: DayRange
 
         do {
@@ -222,17 +241,22 @@ final class EntryLogModel {
         do {
             try await reader.requestAccess()
         } catch {
-            state = .needsAccess("\(error)")
+            if mine == generation { state = .needsAccess("\(error)") }
             return
         }
 
-        calendars = await reader.calendars()
+        let offered = await reader.calendars()
+
+        guard mine == generation, !Task.isCancelled else { return }
+
+        calendars = offered
 
         let reading = await reader.log(createdIn: range, timeZone: timeZone)
 
-        // A search the user has already moved on from should not
-        // overwrite the one they are waiting for.
-        guard !Task.isCancelled else { return }
+        // A read the user has already moved on from -- the range
+        // changed under it, or a sync landed -- must not overwrite
+        // the one they are waiting for.
+        guard mine == generation, !Task.isCancelled else { return }
 
         loaded = reading.entries
         searched = reading.plan.span
